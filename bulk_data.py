@@ -12,7 +12,7 @@ import random
 
 # Import both libraries
 try:
-    import mariadb
+    import airflow_mariadb_provider
 
     MARIADB_AVAILABLE = True
 except ImportError:
@@ -78,7 +78,7 @@ class BulkLoadComparison:
 
         try:
             # Connect to MariaDB
-            conn = mariadb.connect(
+            conn = airflow_mariadb_provider.connect(
                 host='127.0.0.1',
                 port=3307,
                 user='myuser',
@@ -167,7 +167,7 @@ class BulkLoadComparison:
                 improvement = (load_rate / rate - 1) * 100
                 print(f"   🏆 LOAD DATA is {improvement:.1f}% faster than executemany")
 
-            except mariadb.Error as e:
+            except airflow_mariadb_provider.Error as e:
                 print(f"   ⚠️  LOAD DATA failed: {e}")
                 load_data_time = None
                 load_rate = None
