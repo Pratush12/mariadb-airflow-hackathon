@@ -19,18 +19,6 @@ def get_provider_info() -> dict[str, Any]:
                 "class-name": "airflow_mariadb_provider.operators.mariadb_operator.MariaDBOperator",
                 "operator-name": "MariaDBOperator",
             },
-            {
-                "class-name": "airflow_mariadb_provider.operators.mariadb_cpimport_operator.MariaDBCpImportOperator",
-                "operator-name": "MariaDBCpImportOperator",
-            },
-            {
-                "class-name": "airflow_mariadb_provider.operators.mariadb_s3_load_operator.MariaDBS3LoadOperator",
-                "operator-name": "MariaDBS3LoadOperator",
-            },
-            {
-                "class-name": "airflow_mariadb_provider.operators.mariadb_s3_dump_operator.MariaDBS3DumpOperator",
-                "operator-name": "MariaDBS3DumpOperator",
-            },
         ],
         # Add this section
         "connection-types": [

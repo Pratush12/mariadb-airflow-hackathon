@@ -1,0 +1,18 @@
+[
+  {
+    "name": "airports",
+    "url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat",
+    "local_path": "/tmp/airports.dat",
+    "schema": "open_flights_data",
+    "table": "airports",
+    "docker_path": "/var/openflights_data/airports.dat"
+  },
+  {
+    "name": "airlines",
+    "url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat",
+    "local_path": "/tmp/airlines.dat",
+    "schema": "open_flights_data",
+    "table": "airlines",
+    "docker_path": "/var/openflights_data/airlines.dat"
+  }
+]
