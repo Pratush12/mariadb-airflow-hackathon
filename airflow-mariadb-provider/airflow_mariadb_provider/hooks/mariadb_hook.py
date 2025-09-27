@@ -221,7 +221,7 @@ class MariaDBHook(DbApiHook):
                 os.remove(local_file_path)
                 self.log.info(f"Cleaned up temporary file: {local_file_path}")
 
-    def dump_to_s3(self, table_name: str, s3_bucket: str, s3_key: str,
+    def dump_to_s3(self, table_name: str, s3_bucket: str, s3_key: str,query: Optional[str]=None,
                    schema: Optional[str] = None, aws_conn_id: str = 'aws_default',
                    local_temp_dir: Optional[str] = None, file_format: str = 'csv') -> bool:
         """
@@ -256,11 +256,11 @@ class MariaDBHook(DbApiHook):
             self.log.info(f"Exporting data from {schema}.{table_name} to {local_file_path}")
 
             if file_format.lower() == 'csv':
-                self._export_to_csv(table_name, f"/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}", schema)
+                self._export_to_csv(table_name,query,f"/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}", schema)
             elif file_format.lower() == 'json':
-                self._export_to_json(table_name, f"/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}", schema)
+                self._export_to_json(table_name,query, f"/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}", schema)
             elif file_format.lower() == 'sql':
-                self._export_to_sql(table_name, f"/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}", schema)
+                self._export_to_sql(table_name,query,f"/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}", schema)
             else:
                 raise AirflowException(f"Unsupported file format: {file_format}")
 
@@ -306,26 +306,38 @@ class MariaDBHook(DbApiHook):
             self.log.error(f"Error loading data with LOAD DATA INFILE: {e}")
             raise AirflowException(f"Failed to load data: {e}")
 
-    def _export_to_csv(self, table_name: str, file_path: str, schema: str) -> None:
+    def _export_to_csv(self, table_name: str,query:str, file_path: str, schema: str) -> None:
         """Export table data to CSV format."""
-        full_table_name = f"{schema}.{table_name}"
-        export_sql = f"""
-        SELECT * FROM {full_table_name}
-        INTO OUTFILE '{file_path}'
-        FIELDS TERMINATED BY ','
-        ENCLOSED BY '"'
-        LINES TERMINATED BY '\\n'
-        """
+        if query:
+            export_sql = f"""
+                {query}
+                INTO OUTFILE '{file_path}'
+                FIELDS TERMINATED BY ','
+                ENCLOSED BY '"'
+                LINES TERMINATED BY '\\n'
+                """
+        else:
+            full_table_name = f"{schema}.{table_name}"
+            export_sql = f"""
+            SELECT * FROM {full_table_name}
+            INTO OUTFILE '{file_path}'
+            FIELDS TERMINATED BY ','
+            ENCLOSED BY '"'
+            LINES TERMINATED BY '\\n'
+            """
         self.log.info(export_sql)
 
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(export_sql)
 
-    def _export_to_json(self, table_name: str, file_path: str, schema: str) -> None:
+    def _export_to_json(self, table_name: str,query:str, file_path: str, schema: str) -> None:
         """Export table data to JSON format."""
-        full_table_name = f"{schema}.{table_name}"
-        select_sql = f"SELECT * FROM {full_table_name}"
+        if query:
+            select_sql = query
+        else:
+            full_table_name = f"{schema}.{table_name}"
+            select_sql = f"SELECT * FROM {full_table_name}"
 
         with self.get_conn() as conn:
             cursor = conn.cursor()
@@ -340,7 +352,7 @@ class MariaDBHook(DbApiHook):
             with open(file_path, 'w') as f:
                 json.dump(data, f, indent=2, default=str)
 
-    def _export_to_sql(self, table_name: str, file_path: str, schema: str) -> None:
+    def _export_to_sql(self, table_name: str,query:str, file_path: str, schema: str) -> None:
         """Export table data to SQL format using mysqldump."""
         conn = self.get_connection(getattr(self, self.conn_name_attr))
 

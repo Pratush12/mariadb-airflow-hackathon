@@ -53,6 +53,7 @@ s3_dump = MariaDBS3DumpOperator(task_id='dump_to_s3',
                                 aws_conn_id='aws_default',
                                 local_temp_dir='tmp',
                                 file_format='csv',
+                                query = "select * from test_bulk.customers_mariadb_cpimport  where age>55",
                                 dag=dag)
 # create_columnstore_table >>
 s3_load >> s3_dump

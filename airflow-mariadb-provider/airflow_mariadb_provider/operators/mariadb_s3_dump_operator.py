@@ -56,10 +56,12 @@ class MariaDBS3DumpOperator(BaseOperator):
             table_name: str,
             s3_bucket: str,
             s3_key: str,
+            query: Optional[str] = None,
             schema: Optional[str] = None,
             mariadb_conn_id: str = "mariadb_default",
             aws_conn_id: str = "aws_default",
             local_temp_dir: Optional[str] = None,
+
             file_format: str = "csv",
             **kwargs,
     ) -> None:
@@ -67,6 +69,7 @@ class MariaDBS3DumpOperator(BaseOperator):
         self.table_name = table_name
         self.s3_bucket = s3_bucket
         self.s3_key = s3_key
+        self.query = query
         self.schema = schema
         self.mariadb_conn_id = mariadb_conn_id
         self.aws_conn_id = aws_conn_id
@@ -104,6 +107,7 @@ class MariaDBS3DumpOperator(BaseOperator):
                 table_name=self.table_name,
                 s3_bucket=self.s3_bucket,
                 s3_key=self.s3_key,
+                query=self.query,
                 schema=self.schema,
                 aws_conn_id=self.aws_conn_id,
                 local_temp_dir=self.local_temp_dir,
