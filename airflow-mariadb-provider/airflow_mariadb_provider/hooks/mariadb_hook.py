@@ -193,7 +193,11 @@ class MariaDBHook(DbApiHook):
             # Download file from S3
             self.log.info(f"Downloading {s3_bucket}/{s3_key} to {local_file_path}")
             s3_client = self.get_s3_client(aws_conn_id)
+            self.log.info(os.listdir())
             s3_client.download_file(s3_bucket, s3_key, local_file_path)
+            self.log.info(f's3 file downloaded : {local_file_path}')
+            cmd = ["docker","cp",local_file_path,f"mcs1:/var/data/{table_name}_s3_import_{os.getpid()}.csv"]
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
             # Load data into MariaDB
             self.log.info(f"Loading data from {local_file_path} to {schema}.{table_name}")
@@ -202,11 +206,11 @@ class MariaDBHook(DbApiHook):
             try:
                 self.validate_columnstore_engine(table_name, schema)
                 # Use cpimport for ColumnStore tables
-                return self.execute_cpimport(table_name, local_file_path, schema)
+                return self.execute_cpimport(table_name, f"/var/data/{table_name}_s3_import_{os.getpid()}.csv", schema)
             except AirflowException:
                 # Fall back to regular LOAD DATA for non-ColumnStore tables
                 self.log.info("Table is not ColumnStore, using LOAD DATA INFILE")
-                return self._load_data_infile(local_file_path, table_name, schema)
+                return self._load_data_infile(f"/var/data/{table_name}_s3_import_{os.getpid()}.csv", table_name, schema)
 
         except Exception as e:
             self.log.error(f"Error loading data from S3: {e}")
@@ -244,23 +248,26 @@ class MariaDBHook(DbApiHook):
             local_temp_dir = tempfile.gettempdir()
 
         file_extension = file_format.lower()
-        local_file_path = os.path.join(local_temp_dir, f"{table_name}_export_{os.getpid()}.{file_extension}")
+        local_file_path=os.path.join(local_temp_dir, f"{table_name}_export_{os.getpid()}.{file_extension}")
+        #local_file_path = f"{table_name}_export_{os.getpid()}.{file_extension}"
 
         try:
             # Export data from MariaDB
             self.log.info(f"Exporting data from {schema}.{table_name} to {local_file_path}")
 
             if file_format.lower() == 'csv':
-                self._export_to_csv(table_name, local_file_path, schema)
+                self._export_to_csv(table_name, f"/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}", schema)
             elif file_format.lower() == 'json':
-                self._export_to_json(table_name, local_file_path, schema)
+                self._export_to_json(table_name, f"/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}", schema)
             elif file_format.lower() == 'sql':
-                self._export_to_sql(table_name, local_file_path, schema)
+                self._export_to_sql(table_name, f"/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}", schema)
             else:
                 raise AirflowException(f"Unsupported file format: {file_format}")
 
             # Upload to S3
             self.log.info(f"Uploading {local_file_path} to s3://{s3_bucket}/{s3_key}")
+            cmd = ["docker","cp",f"mcs1:/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}",local_file_path]
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             s3_client = self.get_s3_client(aws_conn_id)
             s3_client.upload_file(local_file_path, s3_bucket, s3_key)
 
@@ -309,6 +316,7 @@ class MariaDBHook(DbApiHook):
         ENCLOSED BY '"'
         LINES TERMINATED BY '\\n'
         """
+        self.log.info(export_sql)
 
         with self.get_conn() as conn:
             cursor = conn.cursor()

@@ -12,7 +12,7 @@ import random
 
 # Import both libraries
 try:
-    import airflow_mariadb_provider
+    import mariadb
 
     MARIADB_AVAILABLE = True
 except ImportError:
@@ -78,7 +78,7 @@ class BulkLoadComparison:
 
         try:
             # Connect to MariaDB
-            conn = airflow_mariadb_provider.connect(
+            conn = mariadb.connect(
                 host='127.0.0.1',
                 port=3307,
                 user='myuser',

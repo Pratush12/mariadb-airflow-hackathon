@@ -14,5 +14,37 @@
     "schema": "open_flights_data",
     "table": "airlines",
     "docker_path": "/var/openflights_data/airlines.dat"
+  },
+    {
+        "name": "routes",
+        "url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/routes.dat",
+        "local_path": "/tmp/routes.dat",
+        "schema": "open_flights_data",
+        "table": "routes",
+        "docker_path": "/var/openflights_data/routes.dat"
+    },
+    {
+        "name": "countries",
+        "url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/countries.dat",
+        "local_path": "/tmp/countries.dat",
+        "schema": "open_flights_data",
+        "table": "countries",
+        "docker_path": "/var/openflights_data/countries.dat"
+    },
+    {
+        "name": "planes",
+        "url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/planes.dat",
+        "local_path": "/tmp/planes.dat",
+        "schema": "open_flights_data",
+        "table": "planes",
+        "docker_path": "/var/openflights_data/planes.dat"
+    },
+  {
+    "name": "airport_extended",
+    "url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airport_extended.dat",
+    "local_path": "/tmp/airport_extended.dat",
+    "schema": "open_flights_data",
+    "table": "airports_extended",
+    "docker_path": "/var/openflights_data/airport_extended.dat"
   }
 ]
