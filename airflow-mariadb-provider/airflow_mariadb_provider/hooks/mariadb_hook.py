@@ -375,3 +375,42 @@ class MariaDBHook(DbApiHook):
                 subprocess.run(cmd, stdout=f, check=True)
         except subprocess.CalledProcessError as e:
             raise AirflowException(f"mysqldump failed: {e}")
+
+    def insert_many(self, table_name: str, rows: List[Any], columns: Optional[List[str]] = None, schema: Optional[str] = None) -> bool:
+        """
+        Bulk insert rows into a MariaDB table using executemany.
+
+        Args:
+            table_name: Target table name
+            rows: List of row tuples or dicts to insert
+            columns: List of column names (optional)
+            schema: Database schema name (optional)
+
+        Returns:
+            bool: True if insert was successful
+        """
+        if not rows:
+            self.log.warning("No rows provided for insert_many.")
+            return False
+        if not schema:
+            conn = self.get_connection(getattr(self, self.conn_name_attr))
+            schema = conn.schema
+        full_table_name = f"{schema}.{table_name}" if schema else table_name
+        if columns:
+            cols = ', '.join([f'`{col}`' for col in columns])
+            placeholders = ', '.join(['%s'] * len(columns))
+            sql = f"INSERT INTO {full_table_name} ({cols}) VALUES ({placeholders})"
+        else:
+            placeholders = ', '.join(['%s'] * len(rows[0]))
+            sql = f"INSERT INTO {full_table_name} VALUES ({placeholders})"
+        self.log.info(f"Executing bulk insert: {sql} with {len(rows)} rows")
+        try:
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.executemany(sql, rows)
+                conn.commit()
+            self.log.info(f"Successfully inserted {len(rows)} rows into {full_table_name}")
+            return True
+        except mariadb.Error as e:
+            self.log.error(f"Error in insert_many: {e}")
+            raise AirflowException(f"Failed to insert rows: {e}")
