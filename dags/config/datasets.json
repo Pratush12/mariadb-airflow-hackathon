@@ -5,6 +5,7 @@
     "local_path": "/tmp/airports.dat",
     "schema": "open_flights_data",
     "table": "airports",
+     "ddl_content": "CREATE TABLE open_flights_data.airports (id INT,\n    name VARCHAR(255),\n    city VARCHAR(100),\n    country VARCHAR(100),\n    iata CHAR(3),\n    icao CHAR(4),\n    latitude DECIMAL(9,6),\n    longitude DECIMAL(9,6),\n    altitude INT,\n    timezone DECIMAL(3,1),\n    dst CHAR(1),\n    tz VARCHAR(50),\n    type VARCHAR(50),\n    source VARCHAR(50)\n) engine=ColumnStore;",
     "docker_path": "/var/openflights_data/airports.dat"
   },
   {
@@ -13,6 +14,7 @@
     "local_path": "/tmp/airlines.dat",
     "schema": "open_flights_data",
     "table": "airlines",
+    "ddl_content": "CREATE TABLE open_flights_data.airlines (\n  airline_id int(11) DEFAULT NULL,\n  name varchar(255) DEFAULT NULL,\n  alias varchar(100) DEFAULT NULL,\n  iata char(2) DEFAULT NULL,\n  icao char(3) DEFAULT NULL,\n  callsign varchar(50) DEFAULT NULL,\n  country varchar(100) DEFAULT NULL,\n  active char(1) DEFAULT NULL\n) ENGINE=Columnstore;",
     "docker_path": "/var/openflights_data/airlines.dat"
   },
     {
@@ -21,6 +23,7 @@
         "local_path": "/tmp/routes.dat",
         "schema": "open_flights_data",
         "table": "routes",
+        "ddl_content": "CREATE TABLE open_flights_data.routes (\n  airline varchar(10) DEFAULT NULL,\n  airline_id int(11) DEFAULT NULL,\n  source_airport varchar(10) DEFAULT NULL,\n  source_airport_id int(11) DEFAULT NULL,\n  destination_airport varchar(10) DEFAULT NULL,\n  destination_airport_id int(11) DEFAULT NULL,\n  codeshare char(1) DEFAULT NULL,\n  stops int(11) DEFAULT NULL,\n  equipment varchar(50) DEFAULT NULL\n) ENGINE=Columnstore;",
         "docker_path": "/var/openflights_data/routes.dat"
     },
     {
@@ -29,6 +32,7 @@
         "local_path": "/tmp/countries.dat",
         "schema": "open_flights_data",
         "table": "countries",
+        "ddl_content": "CREATE TABLE open_flights_data.countries (\n  name varchar(255) DEFAULT NULL,\n  iso_code varchar(3) DEFAULT NULL,\n  dafif_code varchar(255) DEFAULT NULL\n) ENGINE=Columnstore;",
         "docker_path": "/var/openflights_data/countries.dat"
     },
     {
@@ -37,14 +41,7 @@
         "local_path": "/tmp/planes.dat",
         "schema": "open_flights_data",
         "table": "planes",
+        "ddl_content": "CREATE TABLE open_flights_data.planes (\n  name varchar(255) DEFAULT NULL,\n  iata char(3) DEFAULT NULL,\n  icao char(4) DEFAULT NULL\n) ENGINE=Columnstore;",
         "docker_path": "/var/openflights_data/planes.dat"
-    },
-  {
-    "name": "airport_extended",
-    "url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airport_extended.dat",
-    "local_path": "/tmp/airport_extended.dat",
-    "schema": "open_flights_data",
-    "table": "airports_extended",
-    "docker_path": "/var/openflights_data/airport_extended.dat"
-  }
+    }
 ]
