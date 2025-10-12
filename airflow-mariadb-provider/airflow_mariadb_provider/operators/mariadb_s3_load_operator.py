@@ -41,6 +41,7 @@ class MariaDBS3LoadOperator(BaseOperator):
     :param mariadb_conn_id: Airflow connection ID for MariaDB
     :param aws_conn_id: Airflow connection ID for AWS
     :param local_temp_dir: Local temporary directory for file download
+    :param ssh_conn_id: SSH connection ID for remote execution (required)
     """
 
     template_fields: Sequence[str] = ("s3_bucket", "s3_key", "table_name", "schema")
@@ -61,6 +62,7 @@ class MariaDBS3LoadOperator(BaseOperator):
             mariadb_conn_id: str = "mariadb_default",
             aws_conn_id: str = "aws_default",
             local_temp_dir: Optional[str] = None,
+            ssh_conn_id: str,
             **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -71,6 +73,7 @@ class MariaDBS3LoadOperator(BaseOperator):
         self.mariadb_conn_id = mariadb_conn_id
         self.aws_conn_id = aws_conn_id
         self.local_temp_dir = local_temp_dir
+        self.ssh_conn_id = ssh_conn_id
 
     def execute(self, context: Context) -> bool:
         """
@@ -100,7 +103,8 @@ class MariaDBS3LoadOperator(BaseOperator):
                 table_name=self.table_name,
                 schema=self.schema,
                 aws_conn_id=self.aws_conn_id,
-                local_temp_dir=self.local_temp_dir
+                local_temp_dir=self.local_temp_dir,
+                ssh_conn_id=self.ssh_conn_id
             )
 
             if result:

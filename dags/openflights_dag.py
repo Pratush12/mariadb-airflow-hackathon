@@ -1,3 +1,16 @@
+"""
+OpenFlights Data Ingestion DAG
+
+This DAG downloads OpenFlights data and loads it into MariaDB ColumnStore using cpimport.
+
+SSH Connection Setup Required:
+1. Create an SSH connection in Airflow UI with connection ID: 'mariadb_ssh_connection'
+2. Configure the connection to point to your MariaDB ColumnStore server
+3. Ensure the SSH user has access to execute cpimport commands
+
+The DAG uses SSH-based execution for better security and scalability.
+"""
+
 import json
 import os
 from pathlib import Path
@@ -10,6 +23,7 @@ from airflow_mariadb_provider.operators.mariadb_operator import MariaDBOperator
 from airflow_mariadb_provider.operators.mariadb_cpimport_operator import MariaDBCpImportOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow_mariadb_provider.hooks.mariadb_hook import MariaDBHook
+from airflow.providers.ssh.operators.ssh import SSHOperator
 
 import requests
 
@@ -44,7 +58,7 @@ def download_file(url: str, local_path: str):
 
 with DAG(
         dag_id="OpenFlightsDataIngestion",
-        description="Download OpenFlights data and load into MariaDB ColumnStore using cpimport",
+        description="Download OpenFlights data and load into MariaDB ColumnStore using cpimport with SSH",
         start_date=days_ago(1),
         schedule_interval=None,
         catchup=False,
@@ -92,9 +106,17 @@ with DAG(
                 op_kwargs={"ddl_content": d["ddl_content"]},
             )
 
-            copy_to_docker = BashOperator(
-                task_id=f"copy_to_docker_{d['name']}",
-                bash_command=f"docker cp {d['local_path']} mcs1:{d['docker_path']}"
+            # # Option 1: Use Docker copy (current approach)
+            # copy_to_docker = BashOperator(
+            #     task_id=f"copy_to_docker_{d['name']}",
+            #     bash_command=f"docker cp {d['local_path']} mcs1:{d['docker_path']}"
+            # )
+
+            # Option 2: Alternative - Use SSH for file transfer (uncomment to use)
+            copy_via_ssh = SSHOperator(
+                task_id=f"copy_via_ssh_{d['name']}",
+                ssh_conn_id='mariadb_ssh_connection',
+                command=f"mkdir -p /var/openflights_data && echo 'File will be transferred via SFTP in cpimport task'"
             )
 
             cpimport_task = MariaDBCpImportOperator(
@@ -103,6 +125,7 @@ with DAG(
                 file_path=d["docker_path"],
                 schema=d["schema"],
                 mariadb_conn_id='maria_db_default',
+                ssh_conn_id='mariadb_ssh_connection',  # Use SSH connection for cpimport
                 cpimport_options={
                     '-E': '"',  # Quotes
                     '-n': r'\N'  # nulls
