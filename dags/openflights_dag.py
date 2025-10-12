@@ -23,7 +23,7 @@ from airflow_mariadb_provider.operators.mariadb_operator import MariaDBOperator
 from airflow_mariadb_provider.operators.mariadb_cpimport_operator import MariaDBCpImportOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow_mariadb_provider.hooks.mariadb_hook import MariaDBHook
-from airflow.providers.ssh.operators.ssh import SSHOperator
+from airflow.providers.sftp.operators.sftp import SFTPOperator
 
 import requests
 
@@ -106,23 +106,20 @@ with DAG(
                 op_kwargs={"ddl_content": d["ddl_content"]},
             )
 
-            # # Option 1: Use Docker copy (current approach)
-            # copy_to_docker = BashOperator(
-            #     task_id=f"copy_to_docker_{d['name']}",
-            #     bash_command=f"docker cp {d['local_path']} mcs1:{d['docker_path']}"
-            # )
 
-            # Option 2: Alternative - Use SSH for file transfer (uncomment to use)
-            copy_via_ssh = SSHOperator(
+            copy_via_ssh = SFTPOperator(
                 task_id=f"copy_via_ssh_{d['name']}",
-                ssh_conn_id='mariadb_ssh_connection',
-                command=f"mkdir -p /var/openflights_data && echo 'File will be transferred via SFTP in cpimport task'"
-            )
+                ssh_conn_id="mariadb_ssh_connection",
+                local_filepath=d['local_path'],
+                remote_filepath=d['ssh_path'],
+                operation="put",
+                create_intermediate_dirs=True
+                    )
 
             cpimport_task = MariaDBCpImportOperator(
                 task_id=f"cpimport_{d['name']}",
                 table_name=d["table"],
-                file_path=d["docker_path"],
+                file_path=d["ssh_path"],
                 schema=d["schema"],
                 mariadb_conn_id='maria_db_default',
                 ssh_conn_id='mariadb_ssh_connection',  # Use SSH connection for cpimport
@@ -133,6 +130,6 @@ with DAG(
                 dag=dag,
             )
 
-            download >> drop_table >> create_table_task >> copy_to_docker >> cpimport_task
+            download >> drop_table >> create_table_task >> copy_via_ssh >> cpimport_task
         task_groups.append(tg)
     start_task>> task_createdb >> task_groups >> end_task
