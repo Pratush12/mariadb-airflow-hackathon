@@ -179,40 +179,6 @@ class MariaDBHook(DbApiHook):
             self.log.error(error_msg)
             raise AirflowException(error_msg)
 
-    def _execute_cpimport_docker(self, table_name: str, file_path: str, schema: str, 
-                                options: Optional[Dict[str, Any]]) -> bool:
-        """Execute cpimport command via direct docker execution (backward compatibility)."""
-        # Build cpimport command
-        cmd = ["docker", "exec", "mcs1", "cpimport", schema, table_name, file_path]
-
-        if '-s' not in cmd and not options:
-            cmd = ["docker", "exec", "mcs1", "cpimport", '-s', ",", schema, table_name, file_path]
-
-        # Add additional options if provided
-        if options:
-            if '-s' not in options.values():
-                cmd.extend(['-s', ","])
-            for key, value in options.items():
-                if key.startswith('-'):
-                    cmd.extend([key, str(value)])
-                else:
-                    cmd.extend([f"-{key}", str(value)])
-
-        self.log.info(f"Executing cpimport command via Docker: {' '.join(cmd)}")
-
-        try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-            self.log.info(f"cpimport completed successfully via Docker")
-            return True
-
-        except subprocess.CalledProcessError as e:
-            error_msg = f"cpimport failed with return code {e.returncode}: {e.stderr}"
-            self.log.error(error_msg)
-            raise AirflowException(error_msg)
-        except FileNotFoundError:
-            error_msg = "cpimport command not found. Please ensure MariaDB ColumnStore tools are installed"
-            self.log.error(error_msg)
-            raise AirflowException(error_msg)
 
     def _copy_file_via_ssh(self, local_file_path: str, remote_file_path: str, ssh_conn_id: str) -> None:
         """Copy file to remote server via SSH."""
@@ -358,8 +324,13 @@ class MariaDBHook(DbApiHook):
             local_temp_dir = tempfile.gettempdir()
 
         file_extension = file_format.lower()
-        local_file_path=os.path.join(local_temp_dir, f"{table_name}_export_{os.getpid()}.{file_extension}")
-        #local_file_path = f"{table_name}_export_{os.getpid()}.{file_extension}"
+        local_file_path = os.path.join(local_temp_dir, f"{table_name}_export_{os.getpid()}.{file_extension}")
+        
+        # Ensure the local_temp_dir exists
+        os.makedirs(local_temp_dir, exist_ok=True)
+        
+        self.log.info(f"Local file path: {local_file_path}")
+        self.log.info(f"Local temp dir: {local_temp_dir}")
 
         try:
             # Export data from MariaDB
@@ -382,6 +353,13 @@ class MariaDBHook(DbApiHook):
                 raise AirflowException("SSH connection ID is required for S3 dump operation")
             
             self._copy_file_from_ssh(f"/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}", local_file_path, ssh_conn_id)
+            
+            # Verify the file exists locally before uploading
+            if not os.path.exists(local_file_path):
+                raise AirflowException(f"Local file does not exist: {local_file_path}")
+            
+            file_size = os.path.getsize(local_file_path)
+            self.log.info(f"Local file size: {file_size} bytes")
                 
             s3_client = self.get_s3_client(aws_conn_id)
             s3_client.upload_file(local_file_path, s3_bucket, s3_key)
