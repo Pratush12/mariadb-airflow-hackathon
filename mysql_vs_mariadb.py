@@ -12,7 +12,7 @@ import subprocess
 
 # ---------------- CONFIG ----------------
 CSV_FILE = "customers.csv"
-N_ROWS = 1000000  # configurable
+N_ROWS = 500000  # configurable
 DB_CONFIG = {
     "user": "myuser",
     "password": "MyStrongP@ssword!",
@@ -213,8 +213,8 @@ def main():
         for i, row in enumerate(reader):
             # skip customer_id in insert
             sample_data.append(tuple(row[1:]))
-            if i >= 100_000:
-                break
+            # if i >= 100_000:
+            #     break
 
     results = []
 
