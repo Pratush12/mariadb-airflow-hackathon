@@ -12,7 +12,7 @@ import subprocess
 
 # ---------------- CONFIG ----------------
 CSV_FILE = "customers.csv"
-N_ROWS = 500000  # configurable
+N_ROWS = 1000000  # configurable
 DB_CONFIG = {
     "user": "myuser",
     "password": "MyStrongP@ssword!",
@@ -125,9 +125,46 @@ def benchmark_executemany(conn, data, batch_size=5000):
 def benchmark_select(conn):
     cur = conn.cursor()
     start = time.time()
-    cur.execute("SELECT COUNT(*) FROM customers")
-    cur.fetchone()
-    cur.execute("SELECT * FROM customers LIMIT 1000")
+    cur.execute("""SELECT
+    c.customer_id,
+    CONCAT(c.first_name, ' ', c.last_name) AS full_name,
+    c.email,
+    c.country,
+    c.city,
+    c.signup_date,
+    c.loyalty_points,
+
+    -- Extract JSON field safely
+    JSON_UNQUOTE(JSON_EXTRACT(c.metadata, '$.preferences.language')) AS preferred_language,
+
+    -- Compute days since signup
+    DATEDIFF(CURDATE(), c.signup_date) AS days_since_signup,
+
+    -- Rank by loyalty within each country
+    RANK() OVER (PARTITION BY c.country ORDER BY c.loyalty_points DESC) AS rank_in_country,
+
+    -- Average loyalty points per country (via window)
+    AVG(c.loyalty_points) OVER (PARTITION BY c.country) AS avg_loyalty_country,
+
+    -- Customer’s deviation from their country average
+    c.loyalty_points - AVG(c.loyalty_points) OVER (PARTITION BY c.country) AS loyalty_gap,
+
+    -- Category by loyalty
+    CASE
+        WHEN c.loyalty_points >= 1000 THEN 'Platinum'
+        WHEN c.loyalty_points >= 500 THEN 'Gold'
+        WHEN c.loyalty_points >= 100 THEN 'Silver'
+        ELSE 'Bronze'
+    END AS loyalty_tier
+
+FROM customers c
+WHERE c.signup_date IS NOT NULL
+  AND c.loyalty_points IS NOT NULL
+
+ORDER BY c.country, rank_in_country;
+    """)
+    # cur.fetchone()
+    # cur.execute("SELECT * FROM customers LIMIT 1000")
     cur.fetchall()
     return time.time() - start
 
