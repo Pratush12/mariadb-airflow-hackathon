@@ -13,7 +13,7 @@ This DAG uses SSH-based execution for secure and scalable operations.
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.decorators import task
-
+from airflow.utils.dates import days_ago
 from airflow_mariadb_provider.operators.mariadb_operator import MariaDBOperator
 from airflow_mariadb_provider.operators.mariadb_cpimport_operator import MariaDBCpImportOperator
 from airflow_mariadb_provider.operators.mariadb_s3_load_operator import MariaDBS3LoadOperator
@@ -31,10 +31,11 @@ default_args = {
 }
 
 dag = DAG(
-    'MariaDB_S3_Operators',
+    'Dag_MariaDB_S3_Operators',
     default_args=default_args,
     description='MariaDB S3 Dump and Load Operators with SSH-based execution',
-    schedule_interval=timedelta(days=1),
+    start_date=days_ago(1),
+    schedule_interval=None,
     catchup=False,
     tags=['s3', 'mariadb', 'ssh'],
 )
@@ -53,17 +54,13 @@ task_createdb = MariaDBOperator(
 task_create_table = MariaDBOperator(
         task_id='create_tables_for_S3',
         sql="""
-        CREATE or replace TABLE open_flights_data.`customers_mariadb` (
-          `id` int(11) NOT NULL AUTO_INCREMENT,
+        CREATE or replace TABLE open_flights_data.`customers_s3_import` (
           `name` varchar(100) DEFAULT NULL,
           `email` varchar(100) DEFAULT NULL,
           `age` int(11) DEFAULT NULL,
           `balance` decimal(10,2) DEFAULT NULL,
           `created_at` datetime DEFAULT NULL,
-          `status` varchar(20) DEFAULT NULL,
-          PRIMARY KEY (`id`),
-          KEY `idx_email` (`email`),
-          KEY `idx_status` (`status`)
+          `status` varchar(20) DEFAULT NULL
         ) ENGINE=InnoDB
         """,
         mariadb_conn_id='maria_db_default',
@@ -74,8 +71,8 @@ task_create_table = MariaDBOperator(
 s3_load = MariaDBS3LoadOperator(task_id='load_data_from_s3',
                                 s3_bucket='test',
                                 s3_key='test_bulk_data.csv',
-                                table_name='customers_mariadb_cpimport',
-                                schema='test_bulk',
+                                table_name='customers_s3_import',
+                                schema='open_flights_data',
                                 mariadb_conn_id='maria_db_default',
                                 aws_conn_id='aws_default',
                                 local_temp_dir='/tmp',
@@ -84,15 +81,15 @@ s3_load = MariaDBS3LoadOperator(task_id='load_data_from_s3',
 
 s3_dump = MariaDBS3DumpOperator(task_id='dump_to_s3',
                                 s3_bucket='test',
-                                s3_key='test_bulk_data_1.csv',
+                                s3_key='s3_export_customers.csv',
                                 table_name='customers_mariadb_cpimport',
-                                schema='test_bulk',
+                                schema='open_flights_data',
                                 mariadb_conn_id='maria_db_default',
                                 aws_conn_id='aws_default',
                                 local_temp_dir='/tmp',  # Fixed: use absolute path
                                 file_format='csv',
-                                query = "select * from test_bulk.customers_mariadb_cpimport  where age>55",
+                                query = "select * from open_flights_data.customers_s3_import  where age>55",
                                 ssh_conn_id='mariadb_ssh_connection',  # Required for SSH-based execution
                                 dag=dag)
 # create_columnstore_table >>
-task_createdb >> task_create_table >> s3_dump >> s3_load
+task_createdb >> task_create_table >> s3_load >> s3_dump

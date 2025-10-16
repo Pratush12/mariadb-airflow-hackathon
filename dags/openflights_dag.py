@@ -57,7 +57,7 @@ def download_file(url: str, local_path: str):
 
 
 with DAG(
-        dag_id="OpenFlightsDataIngestion",
+        dag_id="Dag_OpenFlightsDataIngestion",
         description="Download OpenFlights data and load into MariaDB ColumnStore using cpimport with SSH",
         start_date=days_ago(1),
         schedule_interval=None,
