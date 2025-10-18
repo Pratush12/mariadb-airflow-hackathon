@@ -1,0 +1,122 @@
+[2025-10-16T17:33:20.474+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-10-16T17:33:20.510+0000] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: OpenFlightsDataIngestion.group_planes.copy_via_ssh_planes manual__2025-10-16T17:32:57.571753+00:00 [queued]>
+[2025-10-16T17:33:20.523+0000] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: OpenFlightsDataIngestion.group_planes.copy_via_ssh_planes manual__2025-10-16T17:32:57.571753+00:00 [queued]>
+[2025-10-16T17:33:20.524+0000] {taskinstance.py:2303} INFO - Starting attempt 1 of 1
+[2025-10-16T17:33:20.547+0000] {taskinstance.py:2327} INFO - Executing <Task(SFTPOperator): group_planes.copy_via_ssh_planes> on 2025-10-16 17:32:57.571753+00:00
+[2025-10-16T17:33:20.558+0000] {warnings.py:110} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61: DeprecationWarning: This process (pid=288) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-10-16T17:33:20.561+0000] {standard_task_runner.py:63} INFO - Started process 332 to run task
+[2025-10-16T17:33:20.561+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'OpenFlightsDataIngestion', 'group_planes.copy_via_ssh_planes', 'manual__2025-10-16T17:32:57.571753+00:00', '--job-id', '113', '--raw', '--subdir', 'DAGS_FOLDER/openflights_dag.py', '--cfg-path', '/tmp/tmpfah3l36m']
+[2025-10-16T17:33:20.565+0000] {standard_task_runner.py:91} INFO - Job 113: Subtask group_planes.copy_via_ssh_planes
+[2025-10-16T17:33:20.636+0000] {task_command.py:426} INFO - Running <TaskInstance: OpenFlightsDataIngestion.group_planes.copy_via_ssh_planes manual__2025-10-16T17:32:57.571753+00:00 [running]> on host e6b42f39be87
+[2025-10-16T17:33:20.766+0000] {taskinstance.py:2644} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='OpenFlightsDataIngestion' AIRFLOW_CTX_TASK_ID='group_planes.copy_via_ssh_planes' AIRFLOW_CTX_EXECUTION_DATE='2025-10-16T17:32:57.571753+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-10-16T17:32:57.571753+00:00'
+[2025-10-16T17:33:20.769+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-10-16T17:33:20.772+0000] {sftp.py:158} INFO - sftp_hook/ssh_hook not provided or invalid. Trying ssh_conn_id to create SFTPHook.
+[2025-10-16T17:33:20.786+0000] {base.py:84} INFO - Using connection ID 'mariadb_ssh_connection' for task execution.
+[2025-10-16T17:33:20.787+0000] {warnings.py:110} WARNING - /home/***/.local/lib/python3.12/site-packages/***/providers/sftp/hooks/sftp.py:117: AirflowProviderDeprecationWarning: Extra option `timeout` is deprecated.Please use `conn_timeout` instead.The old option `timeout` will be removed in a future version.
+  super().__init__(*args, **kwargs)
+
+[2025-10-16T17:33:20.789+0000] {warnings.py:110} WARNING - /home/***/.local/lib/python3.12/site-packages/***/providers/sftp/hooks/sftp.py:117: AirflowProviderDeprecationWarning: Parameter `timeout` is deprecated.Please use `conn_timeout` instead.The old option `timeout` will be removed in a future version.
+  super().__init__(*args, **kwargs)
+
+[2025-10-16T17:33:20.790+0000] {ssh.py:301} WARNING - No Host Key Verification. This won't protect against Man-In-The-Middle attacks
+[2025-10-16T17:33:20.800+0000] {transport.py:1909} INFO - Connected (version 2.0, client OpenSSH_10.0)
+[2025-10-16T17:33:20.872+0000] {transport.py:1909} INFO - Authentication (password) failed.
+[2025-10-16T17:33:20.873+0000] {ssh.py:343} INFO - Failed to connect. Sleeping before retry attempt 1
+[2025-10-16T17:33:25.018+0000] {transport.py:1909} INFO - Connected (version 2.0, client OpenSSH_10.0)
+[2025-10-16T17:33:25.086+0000] {transport.py:1909} INFO - Authentication (password) failed.
+[2025-10-16T17:33:25.087+0000] {ssh.py:343} INFO - Failed to connect. Sleeping before retry attempt 2
+[2025-10-16T17:33:29.762+0000] {transport.py:1909} ERROR - Exception (client): Error reading SSH protocol banner
+[2025-10-16T17:33:29.764+0000] {transport.py:1907} ERROR - Traceback (most recent call last):
+[2025-10-16T17:33:29.765+0000] {transport.py:1907} ERROR -   File "/home/***/.local/lib/python3.12/site-packages/paramiko/transport.py", line 2327, in _check_banner
+[2025-10-16T17:33:29.766+0000] {transport.py:1907} ERROR -     buf = self.packetizer.readline(timeout)
+[2025-10-16T17:33:29.766+0000] {transport.py:1907} ERROR -           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2025-10-16T17:33:29.767+0000] {transport.py:1907} ERROR -   File "/home/***/.local/lib/python3.12/site-packages/paramiko/packet.py", line 381, in readline
+[2025-10-16T17:33:29.768+0000] {transport.py:1907} ERROR -     buf += self._read_timeout(timeout)
+[2025-10-16T17:33:29.768+0000] {transport.py:1907} ERROR -            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2025-10-16T17:33:29.768+0000] {transport.py:1907} ERROR -   File "/home/***/.local/lib/python3.12/site-packages/paramiko/packet.py", line 618, in _read_timeout
+[2025-10-16T17:33:29.769+0000] {transport.py:1907} ERROR -     raise EOFError()
+[2025-10-16T17:33:29.769+0000] {transport.py:1907} ERROR - EOFError
+[2025-10-16T17:33:29.770+0000] {transport.py:1907} ERROR - 
+[2025-10-16T17:33:29.770+0000] {transport.py:1907} ERROR - During handling of the above exception, another exception occurred:
+[2025-10-16T17:33:29.771+0000] {transport.py:1907} ERROR - 
+[2025-10-16T17:33:29.771+0000] {transport.py:1907} ERROR - Traceback (most recent call last):
+[2025-10-16T17:33:29.772+0000] {transport.py:1907} ERROR -   File "/home/***/.local/lib/python3.12/site-packages/paramiko/transport.py", line 2143, in run
+[2025-10-16T17:33:29.772+0000] {transport.py:1907} ERROR -     self._check_banner()
+[2025-10-16T17:33:29.773+0000] {transport.py:1907} ERROR -   File "/home/***/.local/lib/python3.12/site-packages/paramiko/transport.py", line 2331, in _check_banner
+[2025-10-16T17:33:29.773+0000] {transport.py:1907} ERROR -     raise SSHException(
+[2025-10-16T17:33:29.773+0000] {transport.py:1907} ERROR - paramiko.ssh_exception.SSHException: Error reading SSH protocol banner
+[2025-10-16T17:33:29.774+0000] {transport.py:1907} ERROR - 
+[2025-10-16T17:33:29.775+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-10-16T17:33:29.785+0000] {taskinstance.py:2890} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/paramiko/transport.py", line 2327, in _check_banner
+    buf = self.packetizer.readline(timeout)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/paramiko/packet.py", line 381, in readline
+    buf += self._read_timeout(timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/paramiko/packet.py", line 618, in _read_timeout
+    raise EOFError()
+EOFError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/sftp/operators/sftp.py", line 185, in execute
+    self.sftp_hook.create_directory(remote_folder)
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/sftp/hooks/sftp.py", line 211, in create_directory
+    conn = self.get_conn()
+           ^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/sftp/hooks/sftp.py", line 126, in get_conn
+    self.conn = super().get_conn().open_sftp()
+                ^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/ssh/hooks/ssh.py", line 347, in get_conn
+    for attempt in Retrying(
+  File "/home/airflow/.local/lib/python3.12/site-packages/tenacity/__init__.py", line 347, in __iter__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/tenacity/__init__.py", line 325, in iter
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/tenacity/__init__.py", line 158, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/ssh/hooks/ssh.py", line 354, in get_conn
+    client.connect(**connect_kwargs)
+  File "/home/airflow/.local/lib/python3.12/site-packages/paramiko/client.py", line 451, in connect
+    t.start_client(timeout=timeout)
+  File "/home/airflow/.local/lib/python3.12/site-packages/paramiko/transport.py", line 738, in start_client
+    raise e
+  File "/home/airflow/.local/lib/python3.12/site-packages/paramiko/transport.py", line 2143, in run
+    self._check_banner()
+  File "/home/airflow/.local/lib/python3.12/site-packages/paramiko/transport.py", line 2331, in _check_banner
+    raise SSHException(
+paramiko.ssh_exception.SSHException: Error reading SSH protocol banner
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 465, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 432, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 400, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/sftp/operators/sftp.py", line 191, in execute
+    raise AirflowException(f"Error while transferring {file_msg}, error: {e}")
+airflow.exceptions.AirflowException: Error while transferring None, error: Error reading SSH protocol banner
+[2025-10-16T17:33:29.796+0000] {taskinstance.py:1205} INFO - Marking task as FAILED. dag_id=OpenFlightsDataIngestion, task_id=group_planes.copy_via_ssh_planes, execution_date=20251016T173257, start_date=20251016T173320, end_date=20251016T173329
+[2025-10-16T17:33:29.815+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 113 for task group_planes.copy_via_ssh_planes (Error while transferring None, error: Error reading SSH protocol banner; 332)
+[2025-10-16T17:33:29.862+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 1
+[2025-10-16T17:33:29.895+0000] {taskinstance.py:3482} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-10-16T17:33:29.902+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

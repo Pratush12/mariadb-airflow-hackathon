@@ -1,0 +1,35 @@
+[2025-10-16T19:41:24.614+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-10-16T19:41:24.637+0000] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: OpenFlightsDataIngestion.create_database manual__2025-10-16T19:41:20.211787+00:00 [queued]>
+[2025-10-16T19:41:24.647+0000] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: OpenFlightsDataIngestion.create_database manual__2025-10-16T19:41:20.211787+00:00 [queued]>
+[2025-10-16T19:41:24.648+0000] {taskinstance.py:2303} INFO - Starting attempt 1 of 1
+[2025-10-16T19:41:24.667+0000] {taskinstance.py:2327} INFO - Executing <Task(MariaDBOperator): create_database> on 2025-10-16 19:41:20.211787+00:00
+[2025-10-16T19:41:24.675+0000] {warnings.py:110} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61: DeprecationWarning: This process (pid=694) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-10-16T19:41:24.677+0000] {standard_task_runner.py:63} INFO - Started process 707 to run task
+[2025-10-16T19:41:24.677+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'OpenFlightsDataIngestion', 'create_database', 'manual__2025-10-16T19:41:20.211787+00:00', '--job-id', '203', '--raw', '--subdir', 'DAGS_FOLDER/openflights_dag.py', '--cfg-path', '/tmp/tmpvtw66hif']
+[2025-10-16T19:41:24.681+0000] {standard_task_runner.py:91} INFO - Job 203: Subtask create_database
+[2025-10-16T19:41:24.741+0000] {task_command.py:426} INFO - Running <TaskInstance: OpenFlightsDataIngestion.create_database manual__2025-10-16T19:41:20.211787+00:00 [running]> on host e6b42f39be87
+[2025-10-16T19:41:24.849+0000] {taskinstance.py:2644} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='OpenFlightsDataIngestion' AIRFLOW_CTX_TASK_ID='create_database' AIRFLOW_CTX_EXECUTION_DATE='2025-10-16T19:41:20.211787+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-10-16T19:41:20.211787+00:00'
+[2025-10-16T19:41:24.852+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-10-16T19:41:24.852+0000] {sql.py:276} INFO - Executing: 
+        CREATE DATABASE IF NOT EXISTS open_flights_data;
+        
+[2025-10-16T19:41:24.863+0000] {base.py:84} INFO - Using connection ID 'maria_db_default' for task execution.
+[2025-10-16T19:41:24.873+0000] {base.py:84} INFO - Using connection ID 'maria_db_default' for task execution.
+[2025-10-16T19:41:24.873+0000] {mariadb_hook.py:38} INFO - Connecting to MariaDB database: open_flights_data
+[2025-10-16T19:41:24.877+0000] {sql.py:457} INFO - Running statement: 
+        CREATE DATABASE IF NOT EXISTS open_flights_data;
+        , parameters: None
+[2025-10-16T19:41:24.878+0000] {sql.py:466} INFO - Rows affected: 0
+[2025-10-16T19:41:24.879+0000] {warnings.py:110} WARNING - /home/***/.local/lib/python3.12/site-packages/***/providers/common/sql/hooks/sql.py:407: AirflowProviderDeprecationWarning: Call to deprecated method _make_common_data_structure. (The `_make_serializable` method is deprecated and support will be removed in a future version of the common.sql provider. Please update the DbApiHook's provider to a version based on common.sql >= 1.9.1.)
+  result = self._make_common_data_structure(handler(cur))
+
+[2025-10-16T19:41:24.881+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-10-16T19:41:24.893+0000] {taskinstance.py:1205} INFO - Marking task as SUCCESS. dag_id=OpenFlightsDataIngestion, task_id=create_database, execution_date=20251016T194120, start_date=20251016T194124, end_date=20251016T194124
+[2025-10-16T19:41:24.943+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 0
+[2025-10-16T19:41:24.963+0000] {warnings.py:110} WARNING - /home/***/.local/lib/python3.12/site-packages/***/models/baseoperator.py:1296: AirflowProviderDeprecationWarning: Call to deprecated class MariaDBOperator. (Please use `***.providers.common.sql.operators.sql.SQLExecuteQueryOperator`.Also, you can provide `hook_params={'schema': <database>}`.)
+  result = cls.__new__(cls)
+
+[2025-10-16T19:41:24.993+0000] {taskinstance.py:3482} INFO - 5 downstream tasks scheduled from follow-on schedule check
+[2025-10-16T19:41:24.997+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

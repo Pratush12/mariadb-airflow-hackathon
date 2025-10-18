@@ -1,0 +1,20 @@
+[2025-10-12T20:35:34.326+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-10-12T20:35:34.361+0000] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: OpenFlightsDataIngestion_SFTP.group_countries.download_countries manual__2025-10-12T20:35:30.313529+00:00 [queued]>
+[2025-10-12T20:35:34.375+0000] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: OpenFlightsDataIngestion_SFTP.group_countries.download_countries manual__2025-10-12T20:35:30.313529+00:00 [queued]>
+[2025-10-12T20:35:34.376+0000] {taskinstance.py:2303} INFO - Starting attempt 1 of 1
+[2025-10-12T20:35:34.401+0000] {taskinstance.py:2327} INFO - Executing <Task(PythonOperator): group_countries.download_countries> on 2025-10-12 20:35:30.313529+00:00
+[2025-10-12T20:35:34.411+0000] {warnings.py:110} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61: DeprecationWarning: This process (pid=86) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-10-12T20:35:34.414+0000] {standard_task_runner.py:63} INFO - Started process 96 to run task
+[2025-10-12T20:35:34.415+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'OpenFlightsDataIngestion_SFTP', 'group_countries.download_countries', 'manual__2025-10-12T20:35:30.313529+00:00', '--job-id', '17', '--raw', '--subdir', 'DAGS_FOLDER/openflights_dag.py', '--cfg-path', '/tmp/tmpdes2hhcn']
+[2025-10-12T20:35:34.419+0000] {standard_task_runner.py:91} INFO - Job 17: Subtask group_countries.download_countries
+[2025-10-12T20:35:34.492+0000] {task_command.py:426} INFO - Running <TaskInstance: OpenFlightsDataIngestion_SFTP.group_countries.download_countries manual__2025-10-12T20:35:30.313529+00:00 [running]> on host e507ee2c0f57
+[2025-10-12T20:35:34.676+0000] {taskinstance.py:2644} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='OpenFlightsDataIngestion_SFTP' AIRFLOW_CTX_TASK_ID='group_countries.download_countries' AIRFLOW_CTX_EXECUTION_DATE='2025-10-12T20:35:30.313529+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-10-12T20:35:30.313529+00:00'
+[2025-10-12T20:35:34.680+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-10-12T20:35:34.810+0000] {python.py:237} INFO - Done. Returned value was: None
+[2025-10-12T20:35:34.813+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-10-12T20:35:34.832+0000] {taskinstance.py:1205} INFO - Marking task as SUCCESS. dag_id=OpenFlightsDataIngestion_SFTP, task_id=group_countries.download_countries, execution_date=20251012T203530, start_date=20251012T203534, end_date=20251012T203534
+[2025-10-12T20:35:34.885+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 0
+[2025-10-12T20:35:34.975+0000] {taskinstance.py:3482} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2025-10-12T20:35:34.977+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

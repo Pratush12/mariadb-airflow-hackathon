@@ -1,0 +1,53 @@
+[2025-10-11T17:33:39.486+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-10-11T17:33:39.520+0000] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: OpenFlightsDataIngestion.group_countries.truncate_table_countries manual__2025-10-11T17:33:31.243331+00:00 [queued]>
+[2025-10-11T17:33:39.537+0000] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: OpenFlightsDataIngestion.group_countries.truncate_table_countries manual__2025-10-11T17:33:31.243331+00:00 [queued]>
+[2025-10-11T17:33:39.538+0000] {taskinstance.py:2303} INFO - Starting attempt 1 of 1
+[2025-10-11T17:33:39.564+0000] {taskinstance.py:2327} INFO - Executing <Task(MariaDBOperator): group_countries.truncate_table_countries> on 2025-10-11 17:33:31.243331+00:00
+[2025-10-11T17:33:39.573+0000] {warnings.py:110} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61: DeprecationWarning: This process (pid=191) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-10-11T17:33:39.576+0000] {standard_task_runner.py:63} INFO - Started process 206 to run task
+[2025-10-11T17:33:39.576+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'OpenFlightsDataIngestion', 'group_countries.truncate_table_countries', 'manual__2025-10-11T17:33:31.243331+00:00', '--job-id', '53', '--raw', '--subdir', 'DAGS_FOLDER/openflights_dag.py', '--cfg-path', '/tmp/tmpm1dggigy']
+[2025-10-11T17:33:39.580+0000] {standard_task_runner.py:91} INFO - Job 53: Subtask group_countries.truncate_table_countries
+[2025-10-11T17:33:39.651+0000] {task_command.py:426} INFO - Running <TaskInstance: OpenFlightsDataIngestion.group_countries.truncate_table_countries manual__2025-10-11T17:33:31.243331+00:00 [running]> on host 57acc0fdfd63
+[2025-10-11T17:33:39.789+0000] {taskinstance.py:2644} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='OpenFlightsDataIngestion' AIRFLOW_CTX_TASK_ID='group_countries.truncate_table_countries' AIRFLOW_CTX_EXECUTION_DATE='2025-10-11T17:33:31.243331+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-10-11T17:33:31.243331+00:00'
+[2025-10-11T17:33:39.793+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-10-11T17:33:39.794+0000] {sql.py:276} INFO - Executing: 
+                Truncate table open_flights_data.countries
+                
+[2025-10-11T17:33:39.810+0000] {base.py:84} INFO - Using connection ID 'maria_db_default' for task execution.
+[2025-10-11T17:33:39.828+0000] {base.py:84} INFO - Using connection ID 'maria_db_default' for task execution.
+[2025-10-11T17:33:39.830+0000] {mariadb_hook.py:37} INFO - Connecting to MariaDB database: 
+[2025-10-11T17:33:39.834+0000] {sql.py:457} INFO - Running statement: 
+                Truncate table open_flights_data.countries
+                , parameters: None
+[2025-10-11T17:33:39.838+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-10-11T17:33:39.839+0000] {taskinstance.py:2890} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 465, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 432, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 400, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/common/sql/operators/sql.py", line 282, in execute
+    output = hook.run(
+             ^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/common/sql/hooks/sql.py", line 404, in run
+    self._run_command(cur, sql_statement, parameters)
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/common/sql/hooks/sql.py", line 462, in _run_command
+    cur.execute(sql_statement)
+  File "/home/airflow/.local/lib/python3.12/site-packages/mariadb/cursors.py", line 351, in execute
+    self._readresponse()
+mariadb.ProgrammingError: Table 'open_flights_data.countries' doesn't exist
+[2025-10-11T17:33:39.856+0000] {taskinstance.py:1205} INFO - Marking task as FAILED. dag_id=OpenFlightsDataIngestion, task_id=group_countries.truncate_table_countries, execution_date=20251011T173331, start_date=20251011T173339, end_date=20251011T173339
+[2025-10-11T17:33:39.873+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 53 for task group_countries.truncate_table_countries (Table 'open_flights_data.countries' doesn't exist; 206)
+[2025-10-11T17:33:39.884+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 1
+[2025-10-11T17:33:39.946+0000] {warnings.py:110} WARNING - /home/***/.local/lib/python3.12/site-packages/***/models/baseoperator.py:1296: AirflowProviderDeprecationWarning: Call to deprecated class MariaDBOperator. (Please use `***.providers.common.sql.operators.sql.SQLExecuteQueryOperator`.Also, you can provide `hook_params={'schema': <database>}`.)
+  result = cls.__new__(cls)
+
+[2025-10-11T17:33:39.969+0000] {taskinstance.py:3482} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-10-11T17:33:39.974+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

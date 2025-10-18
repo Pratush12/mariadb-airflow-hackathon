@@ -1,0 +1,58 @@
+[2025-10-16T19:44:12.188+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-10-16T19:44:12.228+0000] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: OpenFlightsDataIngestion.group_airports.cpimport_airports manual__2025-10-16T19:43:50.755150+00:00 [queued]>
+[2025-10-16T19:44:12.245+0000] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: OpenFlightsDataIngestion.group_airports.cpimport_airports manual__2025-10-16T19:43:50.755150+00:00 [queued]>
+[2025-10-16T19:44:12.246+0000] {taskinstance.py:2303} INFO - Starting attempt 1 of 1
+[2025-10-16T19:44:12.271+0000] {taskinstance.py:2327} INFO - Executing <Task(MariaDBCpImportOperator): group_airports.cpimport_airports> on 2025-10-16 19:43:50.755150+00:00
+[2025-10-16T19:44:12.282+0000] {warnings.py:110} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61: DeprecationWarning: This process (pid=1288) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-10-16T19:44:12.285+0000] {standard_task_runner.py:63} INFO - Started process 1329 to run task
+[2025-10-16T19:44:12.286+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'OpenFlightsDataIngestion', 'group_airports.cpimport_airports', 'manual__2025-10-16T19:43:50.755150+00:00', '--job-id', '245', '--raw', '--subdir', 'DAGS_FOLDER/openflights_dag.py', '--cfg-path', '/tmp/tmp1c7q47kn']
+[2025-10-16T19:44:12.290+0000] {standard_task_runner.py:91} INFO - Job 245: Subtask group_airports.cpimport_airports
+[2025-10-16T19:44:12.366+0000] {task_command.py:426} INFO - Running <TaskInstance: OpenFlightsDataIngestion.group_airports.cpimport_airports manual__2025-10-16T19:43:50.755150+00:00 [running]> on host e6b42f39be87
+[2025-10-16T19:44:12.527+0000] {taskinstance.py:2644} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='OpenFlightsDataIngestion' AIRFLOW_CTX_TASK_ID='group_airports.cpimport_airports' AIRFLOW_CTX_EXECUTION_DATE='2025-10-16T19:43:50.755150+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-10-16T19:43:50.755150+00:00'
+[2025-10-16T19:44:12.531+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-10-16T19:44:12.532+0000] {mariadb_cpimport_operator.py:86} INFO - Starting cpimport operation for table: airports
+[2025-10-16T19:44:12.532+0000] {mariadb_cpimport_operator.py:87} INFO - Source file: /home/***_ssh/data_transfer/airports.dat
+[2025-10-16T19:44:12.533+0000] {mariadb_cpimport_operator.py:95} INFO - Validating ColumnStore engine...
+[2025-10-16T19:44:12.549+0000] {base.py:84} INFO - Using connection ID 'maria_db_default' for task execution.
+[2025-10-16T19:44:12.553+0000] {mariadb_hook.py:38} INFO - Connecting to MariaDB database: open_flights_data
+[2025-10-16T19:44:12.582+0000] {mariadb_hook.py:79} INFO - Table open_flights_data.airports uses engine: Columnstore
+[2025-10-16T19:44:12.586+0000] {mariadb_hook.py:86} INFO - ✓ Table open_flights_data.airports uses ColumnStore engine
+[2025-10-16T19:44:12.587+0000] {mariadb_cpimport_operator.py:97} INFO - ✓ ColumnStore engine validation passed
+[2025-10-16T19:44:12.588+0000] {mariadb_cpimport_operator.py:102} INFO - Executing cpimport command...
+[2025-10-16T19:44:12.600+0000] {base.py:84} INFO - Using connection ID 'maria_db_default' for task execution.
+[2025-10-16T19:44:12.603+0000] {mariadb_hook.py:38} INFO - Connecting to MariaDB database: open_flights_data
+[2025-10-16T19:44:12.607+0000] {mariadb_hook.py:79} INFO - Table open_flights_data.airports uses engine: Columnstore
+[2025-10-16T19:44:12.608+0000] {mariadb_hook.py:86} INFO - ✓ Table open_flights_data.airports uses ColumnStore engine
+[2025-10-16T19:44:12.620+0000] {base.py:84} INFO - Using connection ID 'mariadb_ssh_connection' for task execution.
+[2025-10-16T19:44:12.622+0000] {mariadb_hook.py:156} INFO - Executing cpimport command via SSH: cpimport -s ',' -E \" -n \\N open_flights_data airports /home/***_ssh/data_transfer/airports.dat
+[2025-10-16T19:44:12.623+0000] {ssh.py:301} WARNING - No Host Key Verification. This won't protect against Man-In-The-Middle attacks
+[2025-10-16T19:44:12.639+0000] {transport.py:1909} INFO - Connected (version 2.0, client OpenSSH_8.0)
+[2025-10-16T19:44:12.759+0000] {transport.py:1909} INFO - Authentication (password) successful!
+[2025-10-16T19:44:14.288+0000] {mariadb_hook.py:168} INFO - cpimport completed successfully via SSH
+[2025-10-16T19:44:14.289+0000] {mariadb_hook.py:170} INFO - Output: Locale = C.UTF-8Column delimiter : ,
+Enclosed by Character : "
+
+Using table OID 3173 as the default JOB ID
+Input file(s) will be read from : /root
+Job description file : /var/log/mariadb/columnstore/data/bulk/tmpjob/3173_D20251016_T194413_S025317_Job_3173.xml
+Log file for this job: /var/log/mariadb/columnstore/cpimport/Job_3173.log
+2025-10-16 19:44:13 (2185) INFO : successfully loaded job file /var/log/mariadb/columnstore/data/bulk/tmpjob/3173_D20251016_T194413_S025317_Job_3173.xml
+2025-10-16 19:44:13 (2185) INFO : Job file loaded, run time for this step : 0.102986 seconds
+2025-10-16 19:44:13 (2185) INFO : PreProcessing check starts
+2025-10-16 19:44:13 (2185) INFO : input data file /home/***_ssh/data_transfer/airports.dat
+2025-10-16 19:44:13 (2185) INFO : PreProcessing check completed
+2025-10-16 19:44:13 (2185) INFO : preProcess completed, run time for this step : 0.165888 seconds
+2025-10-16 19:44:13 (2185) INFO : No of Read Threads Spawned = 1
+2025-10-16 19:44:13 (2185) INFO : No of Parse Threads Spawned = 3
+2025-10-16 19:44:13 (2185) INFO : For table open_flights_data.airports: 7698 rows processed and 7698 rows inserted.
+2025-10-16 19:44:14 (2185) INFO : Bulk load completed, total run time : 1.27097 seconds
+
+
+[2025-10-16T19:44:14.290+0000] {mariadb_cpimport_operator.py:112} INFO - ✅ Successfully imported data into airports
+[2025-10-16T19:44:14.290+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-10-16T19:44:14.323+0000] {taskinstance.py:1205} INFO - Marking task as SUCCESS. dag_id=OpenFlightsDataIngestion, task_id=group_airports.cpimport_airports, execution_date=20251016T194350, start_date=20251016T194412, end_date=20251016T194414
+[2025-10-16T19:44:14.379+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 0
+[2025-10-16T19:44:14.411+0000] {taskinstance.py:3482} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-10-16T19:44:14.416+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

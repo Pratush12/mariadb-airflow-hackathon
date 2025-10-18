@@ -1,0 +1,39 @@
+[2025-10-11T19:44:55.630+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-10-11T19:44:55.673+0000] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: OpenFlightsDataIngestion.group_airport_extended.copy_to_docker_airport_extended manual__2025-10-11T19:44:43.678030+00:00 [queued]>
+[2025-10-11T19:44:55.690+0000] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: OpenFlightsDataIngestion.group_airport_extended.copy_to_docker_airport_extended manual__2025-10-11T19:44:43.678030+00:00 [queued]>
+[2025-10-11T19:44:55.691+0000] {taskinstance.py:2303} INFO - Starting attempt 1 of 1
+[2025-10-11T19:44:55.727+0000] {taskinstance.py:2327} INFO - Executing <Task(BashOperator): group_airport_extended.copy_to_docker_airport_extended> on 2025-10-11 19:44:43.678030+00:00
+[2025-10-11T19:44:55.737+0000] {warnings.py:110} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61: DeprecationWarning: This process (pid=270) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-10-11T19:44:55.740+0000] {standard_task_runner.py:63} INFO - Started process 285 to run task
+[2025-10-11T19:44:55.741+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'OpenFlightsDataIngestion', 'group_airport_extended.copy_to_docker_airport_extended', 'manual__2025-10-11T19:44:43.678030+00:00', '--job-id', '80', '--raw', '--subdir', 'DAGS_FOLDER/openflights_dag.py', '--cfg-path', '/tmp/tmputbdorw2']
+[2025-10-11T19:44:55.745+0000] {standard_task_runner.py:91} INFO - Job 80: Subtask group_airport_extended.copy_to_docker_airport_extended
+[2025-10-11T19:44:55.829+0000] {task_command.py:426} INFO - Running <TaskInstance: OpenFlightsDataIngestion.group_airport_extended.copy_to_docker_airport_extended manual__2025-10-11T19:44:43.678030+00:00 [running]> on host 187d1545c280
+[2025-10-11T19:44:55.987+0000] {taskinstance.py:2644} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='OpenFlightsDataIngestion' AIRFLOW_CTX_TASK_ID='group_airport_extended.copy_to_docker_airport_extended' AIRFLOW_CTX_EXECUTION_DATE='2025-10-11T19:44:43.678030+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-10-11T19:44:43.678030+00:00'
+[2025-10-11T19:44:55.992+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-10-11T19:44:55.994+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2025-10-11T19:44:55.995+0000] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', 'docker cp /tmp/airport_extended.dat ***-mariadb-provider-mariadb-1:/var/openflights_data/airport_extended.dat']
+[2025-10-11T19:44:56.012+0000] {subprocess.py:86} INFO - Output:
+[2025-10-11T19:44:56.130+0000] {subprocess.py:93} INFO - Error response from daemon: No such container: ***-mariadb-provider-mariadb-1
+[2025-10-11T19:44:56.132+0000] {subprocess.py:97} INFO - Command exited with return code 1
+[2025-10-11T19:44:56.138+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-10-11T19:44:56.176+0000] {taskinstance.py:2890} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 465, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 432, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 400, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/bash.py", line 243, in execute
+    raise AirflowException(
+airflow.exceptions.AirflowException: Bash command failed. The command returned a non-zero exit code 1.
+[2025-10-11T19:44:56.209+0000] {taskinstance.py:1205} INFO - Marking task as FAILED. dag_id=OpenFlightsDataIngestion, task_id=group_airport_extended.copy_to_docker_airport_extended, execution_date=20251011T194443, start_date=20251011T194455, end_date=20251011T194456
+[2025-10-11T19:44:56.238+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 80 for task group_airport_extended.copy_to_docker_airport_extended (Bash command failed. The command returned a non-zero exit code 1.; 285)
+[2025-10-11T19:44:56.251+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 1
+[2025-10-11T19:44:56.288+0000] {taskinstance.py:3482} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-10-11T19:44:56.295+0000] {local_task_job_runner.py:222} INFO - ::endgroup::
