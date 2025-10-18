@@ -88,14 +88,16 @@ COPY ./airflow-mariadb-provider /opt/airflow/.local/src/airflow-mariadb-provider
 
 # Install the provider
 pip install -e /opt/airflow/.local/src/airflow-mariadb-provider
+```
 
-🐬 Step 2: Install MariaDB with ColumnStore Engine
+### 🐬 Step 2: Install MariaDB with ColumnStore Engine
 
 We use MariaDB ColumnStore inside Docker for high-performance analytical queries.
 
+```bash
 docker run -d -p 3307:3306 -p 2222:22 --shm-size=512m -e PM1=mcs1 --hostname=mcs1 mariadb/columnstore
 docker exec -it mcs1 provision mcs1
-
+```
 
 🧠 Why ColumnStore?
 It enables parallelized columnar data storage — perfect for analytical workloads.
