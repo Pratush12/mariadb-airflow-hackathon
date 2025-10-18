@@ -155,3 +155,55 @@ Then restart the Airflow webserver:
 ```bash
 docker restart airflow-docker-airflow-webserver-1
 ```
+
+### 🔗 Airflow Connections
+
+Once Airflow is running, set up the following connections in the Airflow UI:
+
+Connection ID	Type	Description
+mariadb_default	MariaDB	Host: mcs1, Port: 3306, User: root, Password: mariadb_root_pass
+mariadb_ssh_connection	SSH	Host: mcs1, Port: 22, Username: root, Key File or Password Auth
+aws_default (optional)	S3	For S3 data transfer workflows
+
+After creating the connections, trigger the OpenFlights DAG to start ingestion and monitor results in the MariaDB database.
+
+## 🧪 Running the DAG
+
+Start Airflow UI → [http://localhost:8080](http://localhost:8080)
+
+Trigger the DAG: **OpenFlights Data Ingestion**
+
+Watch:
+
+- 🗂️ SSH file upload logs  
+- ⚙️ cpimport execution  
+- 📊 Data validation queries inside MariaDB  
+
+---
+
+## 🧭 Outcome & Learnings
+
+Through this project, we successfully:
+
+- ✅ Built the first Airflow–MariaDB native connector  
+- ✅ Integrated MariaDB ColumnStore for parallel ETL  
+- ✅ Learned Airflow provider development and Docker networking  
+- ✅ Explored secure SSH integration for data transfer  
+- ✅ Benchmarked MariaDB vs MySQL connector performance  
+
+> 💬 “This hackathon gave us deep insights into how Airflow orchestrates ETL pipelines and how MariaDB’s performance capabilities can be unlocked with the right integration.”
+
+---
+
+## 🏁 Conclusion
+
+The **Airflow MariaDB Connector** bridges a major integration gap in modern data engineering.  
+
+It enables:
+
+- ⚡ Direct and optimized Airflow–MariaDB communication  
+- 🚀 High-speed ETL via cpimport  
+- 📈 Scalable analytics with ColumnStore  
+
+With this, **Ctrl_Alt_db** has taken the first step toward empowering the Airflow community with a truly MariaDB-native data orchestration solution.
+
