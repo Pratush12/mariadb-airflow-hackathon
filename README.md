@@ -48,8 +48,9 @@ The results clearly demonstrate the **performance advantage of MariaDB’s Pytho
 
 ![MariaDB vs MySQL Performance Comparison](images/comparison_between_mariadb_mysql.png)
 
-Note: Above analysis was done on a local machine with 1Million records.
-Code ref: https://github.com/Pratush12/mariadb-airflow-hackathon/blob/main/mysql_vs_mariadb.py
+Note: 
+- Above analysis was done on a local machine with 1Million records.
+- Code ref: https://github.com/Pratush12/mariadb-airflow-hackathon/blob/main/mysql_vs_mariadb.py
 
 ---
 ## 🧠 Concept
@@ -182,6 +183,7 @@ Once Airflow is running, configure these connections in the Airflow UI (`localho
 
 Below is the overall structure of the project:
 
+```
 project-root/
 │
 ├─ README.md # Project documentation
@@ -205,6 +207,7 @@ project-root/
 │ │  └─ mariadb_s3_load_operator.py # Loads data from S3 into MariaDB
 │ └─ setup.py # Installation and package setup
 └─ requirements.txt # Python dependencies
+```
 
 ---
 ## 🧪 Running the DAG
