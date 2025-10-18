@@ -41,7 +41,16 @@ The **Airflow MariaDB Connector** introduces **seamless, native integration** be
 - ⚙️ **3× performance improvement** over MySQL connector for critical database operations
 
 ---
+## ⚡ Performance Comparison: MariaDB vs MySQL
 
+We ran a quick benchmark using `mariadb_and_sql.py` to compare the **execution speed of common operations**.  
+The results clearly demonstrate the **performance advantage of MariaDB’s Python connector over MySQL**, especially for bulk inserts, SELECT queries, and JSON operations.
+
+![MariaDB vs MySQL Performance Comparison](images/comparison_between_mariadb_mysql.png)
+
+Note: Above analysis was done on a local machine with 1Million records.Code ref: https://github.com/Pratush12/mariadb-airflow-hackathon/blob/main/mysql_vs_mariadb.py
+
+---
 ## 🧠 Concept
 
 ### 🎯 Goal
@@ -156,16 +165,17 @@ Then restart the Airflow webserver:
 docker restart airflow-docker-airflow-webserver-1
 ```
 
-### 🔗 Airflow Connections
+## 🔗 Airflow Connections
 
-Once Airflow is running, set up the following connections in the Airflow UI:
+Once Airflow is running, configure these connections in the Airflow UI (`localhost:8080 → Admin → Connections`):
 
-Connection ID	Type	Description
-mariadb_default	MariaDB	Host: mcs1, Port: 3306, User: root, Password: mariadb_root_pass
-mariadb_ssh_connection	SSH	Host: mcs1, Port: 22, Username: root, Key File or Password Auth
-aws_default (optional)	S3	For S3 data transfer workflows
+| Connection ID              | Type    | Description                                                             |
+| -------------------------- | ------- | ----------------------------------------------------------------------- |
+| `mariadb_default`          | MariaDB | Host: `mcs1`, Port: `3306`, User: `root`, Password: `mariadb_root_pass` |
+| `mariadb_ssh_connection`   | SSH     | Host: `mcs1`, Port: `22`, Username: `root`, Password: `mariadb_root_pass`   |
+| `aws_default` *(optional)* | S3      | For S3 data transfer workflows                                          |
 
-After creating the connections, trigger the OpenFlights DAG to start ingestion and monitor results in the MariaDB database.
+---
 
 ## 🧪 Running the DAG
 
