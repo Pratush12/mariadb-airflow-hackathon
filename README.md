@@ -102,3 +102,56 @@ docker exec -it mcs1 provision mcs1
 🧠 Why ColumnStore?
 It enables parallelized columnar data storage — perfect for analytical workloads.
 
+### ⚓ Step 3: Connect Airflow to MariaDB via Docker Network
+
+```bash
+docker network connect airflow_net mcs1
+docker-compose down -v
+docker-compose up -d
+```
+
+Your docker-compose.yml connects both containers (Airflow + MariaDB) via the same network for smooth communication.
+
+### 🐳 Step 4: Dockerfile for Airflow with MariaDB Connector
+
+```bash
+# Use the official Airflow image
+FROM apache/airflow:2.9.0
+
+USER root
+
+# Install dependencies for MariaDB
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        gcc \
+        libmariadb-dev \
+        mariadb-client && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+USER airflow
+ENV PATH="/home/airflow/.local/bin:${PATH}"
+
+# Install Python MariaDB driver
+RUN pip install --no-cache-dir mariadb
+
+# Copy and install custom provider
+COPY --chown=airflow:airflow ./airflow-mariadb-provider /opt/airflow/.local/src/airflow-mariadb-provider
+RUN pip install --no-cache-dir -e /opt/airflow/.local/src/airflow-mariadb-provider
+```
+
+### 🔐 Step 5: Enable SSH Connection in MariaDB Container
+
+SSH is used for secure file transfers (e.g., CSV → cpimport).
+
+```bash
+docker exec -it mcs1 bash
+ssh-keygen -A
+/usr/sbin/sshd -D &
+exit
+```
+
+Then restart the Airflow webserver:
+
+```bash
+docker restart airflow-docker-airflow-webserver-1
+```
