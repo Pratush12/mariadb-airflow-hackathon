@@ -48,7 +48,8 @@ The results clearly demonstrate the **performance advantage of MariaDB’s Pytho
 
 ![MariaDB vs MySQL Performance Comparison](images/comparison_between_mariadb_mysql.png)
 
-Note: Above analysis was done on a local machine with 1Million records.Code ref: https://github.com/Pratush12/mariadb-airflow-hackathon/blob/main/mysql_vs_mariadb.py
+Note: Above analysis was done on a local machine with 1Million records.
+Code ref: https://github.com/Pratush12/mariadb-airflow-hackathon/blob/main/mysql_vs_mariadb.py
 
 ---
 ## 🧠 Concept
@@ -177,6 +178,35 @@ Once Airflow is running, configure these connections in the Airflow UI (`localho
 
 ---
 
+## 📂 Project Structure
+
+Below is the overall structure of the project:
+
+project-root/
+│
+├─ README.md # Project documentation
+├─ docker-compose.yml # Docker Compose setup for Airflow + MariaDB
+├─ Dockerfile # Custom Airflow image with MariaDB connector
+├─ images/ # Screenshots, performance charts
+│ └─ performance_comparison.png
+├─ dags/ # Airflow DAGs
+│ └─ openflights_ingestion_dag.py
+├─ scripts/ # Helper scripts for performance testing
+│ └─ mariadb_and_sql.py
+├─ airflow-mariadb-provider/ # Custom Airflow provider
+│ ├─ airflow_mariadb_provider/ # Main provider module
+│ │ ├─ init.py
+│ │ ├─ hooks/ # Hooks for MariaDB, S3, cpimport
+│ │ │ └─ mariadb_hook.py
+│ │ ├─ operators/ # Custom Airflow operators
+│ │  ├─ mariadb_cpimport_operator.py # Bulk loading via cpimport
+│ │  ├─ mariadb_operator.py # Generic MariaDB task execution
+│ │  ├─ mariadb_s3_dump_operator.py # Uploads MariaDB data to S3
+│ │  └─ mariadb_s3_load_operator.py # Loads data from S3 into MariaDB
+│ └─ setup.py # Installation and package setup
+└─ requirements.txt # Python dependencies
+
+---
 ## 🧪 Running the DAG
 
 Start Airflow UI → [http://localhost:8080](http://localhost:8080)
