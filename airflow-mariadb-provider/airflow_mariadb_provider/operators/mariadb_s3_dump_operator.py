@@ -35,11 +35,13 @@ class MariaDBS3DumpOperator(BaseOperator):
     :param table_name: Source MariaDB table name
     :param s3_bucket: S3 bucket name
     :param s3_key: S3 object key for the exported file
+    :param query: Custom query for export (optional)
     :param schema: Database schema name (optional, uses connection schema if not provided)
     :param mariadb_conn_id: Airflow connection ID for MariaDB
     :param aws_conn_id: Airflow connection ID for AWS
     :param local_temp_dir: Local temporary directory for file export
     :param file_format: Export file format (csv, json, sql)
+    :param ssh_conn_id: SSH connection ID for remote execution (required)
     """
 
     template_fields: Sequence[str] = ("table_name", "s3_bucket", "s3_key", "schema")
@@ -61,8 +63,8 @@ class MariaDBS3DumpOperator(BaseOperator):
             mariadb_conn_id: str = "mariadb_default",
             aws_conn_id: str = "aws_default",
             local_temp_dir: Optional[str] = None,
-
             file_format: str = "csv",
+            ssh_conn_id: str,
             **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -75,6 +77,7 @@ class MariaDBS3DumpOperator(BaseOperator):
         self.aws_conn_id = aws_conn_id
         self.local_temp_dir = local_temp_dir
         self.file_format = file_format.lower()
+        self.ssh_conn_id = ssh_conn_id
 
     def execute(self, context: Context) -> bool:
         """
@@ -111,7 +114,8 @@ class MariaDBS3DumpOperator(BaseOperator):
                 schema=self.schema,
                 aws_conn_id=self.aws_conn_id,
                 local_temp_dir=self.local_temp_dir,
-                file_format=self.file_format
+                file_format=self.file_format,
+                ssh_conn_id=self.ssh_conn_id
             )
 
             if result:

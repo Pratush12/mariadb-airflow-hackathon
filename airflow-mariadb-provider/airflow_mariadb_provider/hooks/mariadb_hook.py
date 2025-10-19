@@ -7,6 +7,7 @@ import os
 from typing import Optional, Dict, Any, List
 from airflow.hooks.dbapi import DbApiHook
 from airflow.exceptions import AirflowException
+from airflow.providers.ssh.hooks.ssh import SSHHook
 
 
 class MariaDBHook(DbApiHook):
@@ -90,21 +91,22 @@ class MariaDBHook(DbApiHook):
             raise AirflowException(f"Failed to check table engine: {e}")
 
     def execute_cpimport(self, table_name: str, file_path: str, schema: Optional[str] = None,
-                         options: Optional[Dict[str, Any]] = None) -> bool:
+                         options: Optional[Dict[str, Any]] = None, ssh_conn_id: str = None) -> bool:
         """
-        Execute cpimport command for ColumnStore tables.
+        Execute cpimport command for ColumnStore tables via SSH.
 
         Args:
             table_name: Name of the target table
             file_path: Path to the data file to import
             schema: Database schema name (optional)
             options: Additional cpimport options
+            ssh_conn_id: SSH connection ID for remote execution (required)
 
         Returns:
             bool: True if import was successful
 
         Raises:
-            AirflowException: If validation fails or cpimport command fails
+            AirflowException: If validation fails, SSH connection is missing, or cpimport command fails
         """
         if not schema:
             conn = self.get_connection(getattr(self, self.conn_name_attr))
@@ -113,38 +115,104 @@ class MariaDBHook(DbApiHook):
         # Validate ColumnStore engine first
         self.validate_columnstore_engine(table_name, schema)
 
-        # Build cpimport command
-        full_table_name = f"{schema}.{table_name}"
-        cmd = ["docker", "exec", "mcs1", "cpimport", schema, table_name, file_path]
+        # Execute cpimport command via SSH
+        if not ssh_conn_id:
+            raise AirflowException("SSH connection ID is required for cpimport execution")
+        
+        return self._execute_cpimport_ssh(table_name, file_path, schema, options, ssh_conn_id)
 
-        if '-s' not in cmd and not options:
-            cmd = ["docker", "exec", "mcs1", "cpimport", '-s', ",", schema, table_name, file_path]
-
-        # Add additional options if provided
-        if options:
-            if '-s' not in options.values():
-                cmd.extend(['-s', ","])
-            for key, value in options.items():
-                if key.startswith('-'):
-                    cmd.extend([key, str(value)])
-
-                else:
-                    cmd.extend([f"-{key}", str(value)])
-
-        self.log.info(f"Executing cpimport command: {' '.join(cmd)}")
-
+    def _execute_cpimport_ssh(self, table_name: str, file_path: str, schema: str, 
+                             options: Optional[Dict[str, Any]], ssh_conn_id: str) -> bool:
+        """Execute cpimport command via SSH."""
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-
-            # self.log.info(f"cpimport completed successfully: {result.stdout}")
-            return True
-
-        except subprocess.CalledProcessError as e:
-            error_msg = f"cpimport failed with return code {e.returncode}: {e.stderr}"
+            ssh_hook = SSHHook(ssh_conn_id=ssh_conn_id)
+            
+            # Build cpimport command for SSH execution using the working format
+            cmd_parts = ["cpimport"]
+            
+            # Add separator option if not provided
+            if not options or '-s' not in options:
+                cmd_parts.extend(['-s', "','"])
+            
+            # Add additional options if provided
+            if options:
+                for key, value in options.items():
+                    if key.startswith('-'):
+                        # Handle special characters with proper escaping
+                        if key == '-E' and value == '"':
+                            cmd_parts.extend([key, '\\"'])
+                        elif key == '-n' and value == r'\N':
+                            cmd_parts.extend([key, '\\\\N'])
+                        else:
+                            cmd_parts.extend([key, str(value)])
+                    else:
+                        cmd_parts.extend([f"-{key}", str(value)])
+            
+            # Add schema, table, and file path at the end
+            cmd_parts.extend([schema, table_name, file_path])
+            
+            # Join command parts with spaces
+            cmd = " ".join(cmd_parts)
+            self.log.info(f"Executing cpimport command via SSH: {cmd}")
+            
+            # Execute command via SSH
+            with ssh_hook.get_conn() as ssh_client:
+                stdin, stdout, stderr = ssh_client.exec_command(cmd)
+                exit_status = stdout.channel.recv_exit_status()
+                
+                # Read output and error messages
+                stdout_content = stdout.read().decode('utf-8')
+                stderr_content = stderr.read().decode('utf-8')
+                
+                if exit_status == 0:
+                    self.log.info(f"cpimport completed successfully via SSH")
+                    if stdout_content:
+                        self.log.info(f"Output: {stdout_content}")
+                    return True
+                else:
+                    error_msg = f"cpimport failed via SSH with exit code {exit_status}: {stderr_content}"
+                    self.log.error(error_msg)
+                    raise AirflowException(error_msg)
+                
+        except Exception as e:
+            error_msg = f"SSH execution failed: {e}"
             self.log.error(error_msg)
             raise AirflowException(error_msg)
-        except FileNotFoundError:
-            error_msg = "cpimport command not found. Please ensure MariaDB ColumnStore tools are installed"
+
+
+    def _copy_file_via_ssh(self, local_file_path: str, remote_file_path: str, ssh_conn_id: str) -> None:
+        """Copy file to remote server via SSH."""
+        try:
+            ssh_hook = SSHHook(ssh_conn_id=ssh_conn_id)
+            
+            # Use SFTP to copy the file
+            with ssh_hook.get_conn() as ssh_client:
+                sftp_client = ssh_client.open_sftp()
+                sftp_client.put(local_file_path, remote_file_path)
+                sftp_client.close()
+                
+            self.log.info(f"Successfully copied {local_file_path} to {remote_file_path} via SSH")
+            
+        except Exception as e:
+            error_msg = f"Failed to copy file via SSH: {e}"
+            self.log.error(error_msg)
+            raise AirflowException(error_msg)
+
+    def _copy_file_from_ssh(self, remote_file_path: str, local_file_path: str, ssh_conn_id: str) -> None:
+        """Copy file from remote server via SSH."""
+        try:
+            ssh_hook = SSHHook(ssh_conn_id=ssh_conn_id)
+            
+            # Use SFTP to copy the file
+            with ssh_hook.get_conn() as ssh_client:
+                sftp_client = ssh_client.open_sftp()
+                sftp_client.get(remote_file_path, local_file_path)
+                sftp_client.close()
+                
+            self.log.info(f"Successfully copied {remote_file_path} to {local_file_path} via SSH")
+            
+        except Exception as e:
+            error_msg = f"Failed to copy file from SSH: {e}"
             self.log.error(error_msg)
             raise AirflowException(error_msg)
 
@@ -164,7 +232,7 @@ class MariaDBHook(DbApiHook):
 
     def load_from_s3(self, s3_bucket: str, s3_key: str, table_name: str,
                      schema: Optional[str] = None, aws_conn_id: str = 'aws_default',
-                     local_temp_dir: Optional[str] = None) -> bool:
+                     local_temp_dir: Optional[str] = None, ssh_conn_id: str = None) -> bool:
         """
         Load data from S3 to MariaDB table.
 
@@ -175,6 +243,7 @@ class MariaDBHook(DbApiHook):
             schema: Database schema name (optional)
             aws_conn_id: Airflow connection ID for AWS
             local_temp_dir: Local temporary directory for file download
+            ssh_conn_id: SSH connection ID for remote execution (required)
 
         Returns:
             bool: True if load was successful
@@ -196,8 +265,12 @@ class MariaDBHook(DbApiHook):
             self.log.info(os.listdir())
             s3_client.download_file(s3_bucket, s3_key, local_file_path)
             self.log.info(f's3 file downloaded : {local_file_path}')
-            cmd = ["docker","cp",local_file_path,f"mcs1:/var/data/{table_name}_s3_import_{os.getpid()}.csv"]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            
+            # Copy file to remote server via SSH
+            if not ssh_conn_id:
+                raise AirflowException("SSH connection ID is required for S3 load operation")
+            
+            self._copy_file_via_ssh(local_file_path, f"/var/data/{table_name}_s3_import_{os.getpid()}.csv", ssh_conn_id)
 
             # Load data into MariaDB
             self.log.info(f"Loading data from {local_file_path} to {schema}.{table_name}")
@@ -206,7 +279,7 @@ class MariaDBHook(DbApiHook):
             try:
                 self.validate_columnstore_engine(table_name, schema)
                 # Use cpimport for ColumnStore tables
-                return self.execute_cpimport(table_name, f"/var/data/{table_name}_s3_import_{os.getpid()}.csv", schema)
+                return self.execute_cpimport(table_name, f"/var/data/{table_name}_s3_import_{os.getpid()}.csv", schema, ssh_conn_id=ssh_conn_id)
             except AirflowException:
                 # Fall back to regular LOAD DATA for non-ColumnStore tables
                 self.log.info("Table is not ColumnStore, using LOAD DATA INFILE")
@@ -223,7 +296,8 @@ class MariaDBHook(DbApiHook):
 
     def dump_to_s3(self, table_name: str, s3_bucket: str, s3_key: str,query: Optional[str]=None,
                    schema: Optional[str] = None, aws_conn_id: str = 'aws_default',
-                   local_temp_dir: Optional[str] = None, file_format: str = 'csv') -> bool:
+                   local_temp_dir: Optional[str] = None, file_format: str = 'csv', 
+                   ssh_conn_id: str = None) -> bool:
         """
         Export MariaDB table data to S3.
 
@@ -231,10 +305,12 @@ class MariaDBHook(DbApiHook):
             table_name: Source MariaDB table name
             s3_bucket: S3 bucket name
             s3_key: S3 object key for the exported file
+            query: Custom query for export (optional)
             schema: Database schema name (optional)
             aws_conn_id: Airflow connection ID for AWS
             local_temp_dir: Local temporary directory for file export
             file_format: Export file format (csv, json, sql)
+            ssh_conn_id: SSH connection ID for remote execution (required)
 
         Returns:
             bool: True if export was successful
@@ -248,8 +324,13 @@ class MariaDBHook(DbApiHook):
             local_temp_dir = tempfile.gettempdir()
 
         file_extension = file_format.lower()
-        local_file_path=os.path.join(local_temp_dir, f"{table_name}_export_{os.getpid()}.{file_extension}")
-        #local_file_path = f"{table_name}_export_{os.getpid()}.{file_extension}"
+        local_file_path = os.path.join(local_temp_dir, f"{table_name}_export_{os.getpid()}.{file_extension}")
+        
+        # Ensure the local_temp_dir exists
+        os.makedirs(local_temp_dir, exist_ok=True)
+        
+        self.log.info(f"Local file path: {local_file_path}")
+        self.log.info(f"Local temp dir: {local_temp_dir}")
 
         try:
             # Export data from MariaDB
@@ -266,8 +347,20 @@ class MariaDBHook(DbApiHook):
 
             # Upload to S3
             self.log.info(f"Uploading {local_file_path} to s3://{s3_bucket}/{s3_key}")
-            cmd = ["docker","cp",f"mcs1:/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}",local_file_path]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            
+            # Copy file from remote server via SSH
+            if not ssh_conn_id:
+                raise AirflowException("SSH connection ID is required for S3 dump operation")
+            
+            self._copy_file_from_ssh(f"/var/outfiles/{table_name}_export_{os.getpid()}.{file_extension}", local_file_path, ssh_conn_id)
+            
+            # Verify the file exists locally before uploading
+            if not os.path.exists(local_file_path):
+                raise AirflowException(f"Local file does not exist: {local_file_path}")
+            
+            file_size = os.path.getsize(local_file_path)
+            self.log.info(f"Local file size: {file_size} bytes")
+                
             s3_client = self.get_s3_client(aws_conn_id)
             s3_client.upload_file(local_file_path, s3_bucket, s3_key)
 

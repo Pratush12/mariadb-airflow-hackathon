@@ -39,6 +39,7 @@ class MariaDBCpImportOperator(BaseOperator):
     :param mariadb_conn_id: Airflow connection ID for MariaDB
     :param cpimport_options: Additional cpimport command options
     :param validate_engine: Whether to validate ColumnStore engine before import (default: True)
+    :param ssh_conn_id: SSH connection ID for remote execution (required)
     """
 
     template_fields: Sequence[str] = ("table_name", "file_path", "schema")
@@ -57,6 +58,7 @@ class MariaDBCpImportOperator(BaseOperator):
             mariadb_conn_id: str = "maria_db_default",
             cpimport_options: Optional[Dict[str, Any]] = None,
             validate_engine: bool = True,
+            ssh_conn_id: str,
             **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -66,6 +68,7 @@ class MariaDBCpImportOperator(BaseOperator):
         self.mariadb_conn_id = mariadb_conn_id
         self.cpimport_options = cpimport_options or {}
         self.validate_engine = validate_engine
+        self.ssh_conn_id = ssh_conn_id
 
     def execute(self, context: Context) -> bool:
         """
@@ -101,7 +104,8 @@ class MariaDBCpImportOperator(BaseOperator):
                 table_name=self.table_name,
                 file_path=self.file_path,
                 schema=self.schema,
-                options=self.cpimport_options
+                options=self.cpimport_options,
+                ssh_conn_id=self.ssh_conn_id
             )
 
             if result:
