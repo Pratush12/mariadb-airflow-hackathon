@@ -173,8 +173,8 @@ Once Airflow is running, configure these connections in the Airflow UI (`localho
 
 | Connection ID              | Type    | Description                                                             |
 | -------------------------- | ------- | ----------------------------------------------------------------------- |
-| `mariadb_default`          | MariaDB | Host: `mcs1`, Port: `3306`, User: `root`, Password: `mariadb_root_pass` |
-| `mariadb_ssh_connection`   | SSH     | Host: `mcs1`, Port: `22`, Username: `root`, Password: `mariadb_root_pass`   |
+| `mariadb_default`          | MariaDB | Host: `maria_db_hostname`, Port: `3306`, User: `username`, Password: `mariadb_root_pass` |
+| `mariadb_ssh_connection`   | SSH     | Host: `mariadb_server_host`, Port: `22`, Username: `username`, Password: `mariadb_root_pass`   |
 | `aws_default` *(optional)* | S3      | For S3 data transfer workflows                                          |
 
 ---
