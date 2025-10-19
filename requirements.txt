@@ -1,0 +1,12 @@
+apache-airflow==2.10.2
+apache-airflow-providers-amazon==9.14.0 #for aws related libs
+apache-airflow-providers-sftp==5.4.0
+apache-airflow-providers-ssh==4.1.4
+
+boto3==1.40.37
+paramiko==3.5.1
+mariadb==1.1.13
+
+# optional but often used for Airflow or logging
+watchtower==3.4.0
+requests==2.32.3
