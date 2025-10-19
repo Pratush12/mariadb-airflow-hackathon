@@ -1,0 +1,139 @@
+version: '3.9'
+
+x-airflow-common:
+  &airflow-common
+  image: my-airflow:latest
+  build:
+    context: .
+    dockerfile: Dockerfile
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    AIRFLOW_CONN_MARIADB_COLUMNSTORE: 'mysql+mysqldb://root:mariadb_root_pass@mcs1_db:3306/mydb' # Updated hostname
+    PATH: /usr/local/bin:/home/airflow/.local/bin:$PATH
+    _PIP_ADDITIONAL_REQUIREMENTS: ''
+  volumes:
+    - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
+    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
+    - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
+    - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+    - ./airflow-mariadb-provider:/opt/airflow/.local/src/airflow-mariadb-provider
+    - /var/run/docker.sock:/var/run/docker.sock
+    # Add a volume mapping to share files with the SSH sidecar
+    - ./data_transfer:/tmp/data_transfer
+  depends_on:
+    redis:
+      condition: service_healthy
+    postgres:
+      condition: service_healthy
+  user: "50000:0"
+  networks:
+    - airflow_net
+
+services:
+  # --- NEW SERVICES START HERE ---
+
+  # --- EXISTING SERVICES (Dependencies Updated) ---
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
+    networks:
+      - airflow_net
+
+  redis:
+    image: redis:latest
+    expose:
+      - 6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 30s
+      retries: 50
+      start_period: 30s
+    restart: always
+    networks:
+      - airflow_net
+
+  airflow-init:
+    <<: *airflow-common
+    command: bash -c "airflow db migrate && airflow users create \
+      --username ${_AIRFLOW_WWW_USER_USERNAME:-airflow} \
+      --firstname Airflow \
+      --lastname Admin \
+      --role Admin \
+      --email admin@example.com \
+      --password ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}"
+    environment:
+      <<: *airflow-common-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - airflow_net
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - airflow_net
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - airflow_net
+
+  airflow-worker:
+    <<: *airflow-common
+    command: celery worker
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - airflow_net
+
+  airflow-triggerer:
+    <<: *airflow-common
+    command: triggerer
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - airflow_net
+
+volumes:
+  postgres-db-volume:
+
+networks:
+  airflow_net:
+    external: true
