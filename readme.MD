@@ -192,9 +192,8 @@ project-root/
 ├─ images/ # Screenshots, performance charts
 │ └─ performance_comparison.png
 ├─ dags/ # Airflow DAGs
-│ └─ openflights_ingestion_dag.py
-├─ scripts/ # Helper scripts for performance testing
-│ └─ mariadb_and_sql.py
+│ └─ openflights_dag.py
+|  └─ mariadb_s3_operators_dag.py
 ├─ airflow-mariadb-provider/ # Custom Airflow provider
 │ ├─ airflow_mariadb_provider/ # Main provider module
 │ │ ├─ init.py
@@ -206,7 +205,6 @@ project-root/
 │ │  ├─ mariadb_s3_dump_operator.py # Uploads MariaDB data to S3
 │ │  └─ mariadb_s3_load_operator.py # Loads data from S3 into MariaDB
 │ └─ setup.py # Installation and package setup
-└─ requirements.txt # Python dependencies
 ```
 
 ---
