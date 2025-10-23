@@ -221,9 +221,5 @@ cleanup_tables = MariaDBOperator(
 
 # [START task_dependencies]
 # Create tables in parallel
-[create_columnstore_table, create_product_table, create_customer_table] >> \
-# Load data in parallel
-[bulk_load_sales_data, bulk_load_product_data, bulk_load_customer_data] >> \
-# Validate and cleanup
-validate_data_loaded >> cleanup_tables
+[create_columnstore_table, create_product_table, create_customer_table] >> [bulk_load_sales_data, bulk_load_product_data, bulk_load_customer_data] >> validate_data_loaded >> cleanup_tables
 # [END task_dependencies]
