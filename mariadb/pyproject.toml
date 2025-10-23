@@ -56,10 +56,11 @@ requires-python = ">=3.10"
 # Any change in the dependencies is preserved when the file is regenerated
 # Make sure to run ``prek update-providers-dependencies --all-files``
 # After you modify the dependencies, and rebuild your Breeze CI image with ``breeze ci-image build``
-dependencies = [
-    "apache-airflow>=2.5.0",
+dependencies = [    "apache-airflow>=2.5.0",
     "mariadb>=1.1.0",
-    "boto3>=1.26.0",
+    "apache-airflow-providers-amazon==9.14.0",
+    "apache-airflow-providers-sftp==5.4.0",
+    "apache-airflow-providers-ssh==4.1.4",
 ]
 
 # The optional dependencies should be modified in place in the generated file
