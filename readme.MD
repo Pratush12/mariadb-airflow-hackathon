@@ -138,7 +138,7 @@ This provider:
 
 ```bash
 # Clone or copy your provider into the airflow directory
-COPY ./airflow-mariadb-provider /opt/airflow/.local/src/airflow-mariadb-provider
+COPY ./mariadb /opt/airflow/.local/src/airflow-mariadb-provider
 
 # Install the provider
 pip install -e /opt/airflow/.local/src/airflow-mariadb-provider
