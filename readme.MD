@@ -80,13 +80,56 @@ Automate **OpenFlights** data ingestion using:
 
 ## ⚙️ Installation & Setup Instructions
 
-Follow these steps to set up and run the **Airflow MariaDB Connector project** locally.
+Choose the installation method that best fits your needs:
 
 ---
 
-### 🧱 Step 1: Add Custom Provider to Airflow
+### 🚀 Option 1: Quick Install (Recommended for Production)
 
-Since Airflow doesn’t natively support MariaDB, we created a **custom provider**.
+Install the MariaDB provider directly from GitHub:
+
+```bash
+# Install the latest version
+pip install -U git+https://github.com/Pratush12/mariadb-airflow-hackathon.git@main#subdirectory=airflow-mariadb-provider
+
+# Or install with all optional dependencies (S3, SSH support)
+pip install -U "git+https://github.com/Pratush12/mariadb-airflow-hackathon.git@main#subdirectory=airflow-mariadb-provider[all]"
+```
+
+**Requirements:**
+- Python 3.8+
+- Apache Airflow 2.5.0+
+- MariaDB server (for database operations)
+- SSH access (for cpimport operations)
+
+---
+
+### 🔧 Option 2: Clone and Install (Development)
+
+For development or customization:
+
+```bash
+# Clone the repository
+git clone https://github.com/Pratush12/mariadb-airflow-hackathon.git
+cd mariadb-airflow-hackathon/airflow-mariadb-provider
+
+# Install in development mode
+pip install -e ".[all]"
+
+# Or install with specific features
+pip install -e ".[amazon]"  # S3 support
+pip install -e ".[ssh]"     # SSH support
+```
+
+---
+
+### 🐳 Option 3: Docker Setup (Full Development Environment)
+
+For a complete development environment with MariaDB ColumnStore:
+
+#### 🧱 Step 1: Add Custom Provider to Airflow
+
+Since Airflow doesn't natively support MariaDB, we created a **custom provider**.
 
 This provider:
 - Adds **MariaDB connection type**
@@ -100,6 +143,36 @@ COPY ./airflow-mariadb-provider /opt/airflow/.local/src/airflow-mariadb-provider
 # Install the provider
 pip install -e /opt/airflow/.local/src/airflow-mariadb-provider
 ```
+
+---
+
+## 🏃‍♂️ Quick Start
+
+After installation, create a MariaDB connection in Airflow:
+
+1. **Go to Admin → Connections** in Airflow UI (`localhost:8080`)
+2. **Add new connection:**
+   - **Connection ID**: `mariadb_default`
+   - **Connection Type**: `MariaDB`
+   - **Host**: Your MariaDB server
+   - **Port**: 3306
+   - **Login**: Your username
+   - **Password**: Your password
+   - **Schema**: Your database name
+
+3. **Use the operators in your DAGs:**
+```python
+from airflow.providers.mariadb.operators.mariadb import MariaDBOperator
+
+# Basic SQL execution
+sql_task = MariaDBOperator(
+    task_id="execute_sql",
+    mariadb_conn_id="mariadb_default",
+    sql="SELECT * FROM my_table"
+)
+```
+
+---
 
 ### 🐬 Step 2: Install MariaDB with ColumnStore Engine
 
