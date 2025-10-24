@@ -257,27 +257,85 @@ Once Airflow is running, configure these connections in the Airflow UI (`localho
 Below is the overall structure of the project:
 
 ```
-project-root/
+mariadb-airflow-hackathon/
 │
-├─ README.md # Project documentation
+├─ readme.MD # Project documentation
 ├─ docker-compose.yml # Docker Compose setup for Airflow + MariaDB
 ├─ Dockerfile # Custom Airflow image with MariaDB connector
+├─ requirements.txt # Python dependencies
+├─ mysql_vs_mariadb.py # Performance benchmarking script
+├─ download_openflights_data.py # Data download utility
+├─ execute_docker.py # Docker execution helper
+├─ ssh_python.py # SSH connection testing
+├─ use_sql_cpimport.py # cpimport utility testing
+├─ benchmark_results.csv # Performance benchmark results
+├─ test_bulk_data.csv # Sample test data
+├─ notes.txt # Development notes
 ├─ images/ # Screenshots, performance charts
-│ └─ performance_comparison.png
+│ └─ comparison_between_mariadb_mysql.png
 ├─ dags/ # Airflow DAGs
-│ └─ openflights_dag.py
+│ ├─ config/
+│ │ └─ datasets.json # Dataset configuration
+│ ├─ openflights_dag.py # Main OpenFlights data ingestion DAG
+│ ├─ mariadb_s3_operators_dag.py # S3 integration DAG
+│ ├─ mysql_vs_mariadb_benchmark_dag.py # Performance benchmark DAG
+│ ├─ dag_all_operators.py # All operators demonstration DAG
+│ ├─ test_insertmany_dag.py # Bulk insert testing DAG
+│ └─ README_benchmark_setup.md # Benchmark setup documentation
+│
+├─ openflights_data/ # Sample datasets
+│ ├─ airlines.dat
+│ ├─ airports.dat
+│ ├─ airports_extended.dat
+│ ├─ countries.dat
+│ ├─ planes.dat
+│ └─ routes.dat
+│
+├─ library_results/ # Performance analysis results
+│ └─ bulk_load_comparison.json
 |  └─ mariadb_s3_operators_dag.py
-├─ airflow-mariadb-provider/ # Custom Airflow provider
-│ ├─ airflow_mariadb_provider/ # Main provider module
-│ │ ├─ init.py
-│ │ ├─ hooks/ # Hooks for MariaDB, S3, cpimport
-│ │ │ └─ mariadb_hook.py
-│ │ ├─ operators/ # Custom Airflow operators
-│ │  ├─ mariadb_cpimport_operator.py # Bulk loading via cpimport
-│ │  ├─ mariadb_operator.py # Generic MariaDB task execution
-│ │  ├─ mariadb_s3_dump_operator.py # Uploads MariaDB data to S3
-│ │  └─ mariadb_s3_load_operator.py # Loads data from S3 into MariaDB
-│ └─ setup.py # Installation and package setup
+└─ mariadb/ # Apache Airflow MariaDB Provider
+   ├─ pyproject.toml # Modern Python packaging configuration
+   ├─ README.rst # Provider documentation
+   ├─ docs/ # Sphinx documentation
+   │ ├─ index.rst
+   │ ├─ changelog.rst
+   │ ├─ commits.rst
+   │ ├─ operators.rst
+   │ ├─ security.rst
+   │ ├─ connections/
+   │ │ └─ mariadb.rst
+   │ ├─ example_dags/
+   │ │ ├─ example_mariadb_basic.py
+   │ │ ├─ example_mariadb_cpimport.py
+   │ │ └─ example_mariadb_s3.py
+   │ └─ installing-providers-from-sources.rst
+   │
+   ├─ src/airflow/providers/mariadb/ # Main provider code
+   │ ├─ __init__.py # Provider metadata
+   │ ├─ get_provider_info.py # Provider information
+   │ ├─ hooks/
+   │ │ ├─ __init__.py
+   │ │ └─ mariadb.py # MariaDB hook implementation
+   │ ├─ operators/
+   │ │ ├─ __init__.py
+   │ │ ├─ mariadb.py # Basic MariaDB operator
+   │ │ ├─ cpimport.py # cpimport operator
+   │ │ └─ s3.py # S3 integration operators
+   │ ├─ sensors/
+   │ │ └─ __init__.py
+   │ └─ transfers/
+   │     └─ __init__.py
+   │
+   └─ tests/ # Comprehensive test suite
+      ├─ conftest.py # Test configuration
+      ├─ unit/mariadb/ # Unit tests
+      │ ├─ hooks/
+      │ │ └─ test_mariadb.py
+      │ └─ __init__.py
+      └─ system/mariadb/ # System tests
+         ├─ example_mariadb.py
+         └─ __init__.py
 ```
 
 ---
