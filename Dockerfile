@@ -13,7 +13,6 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Switch back to airflow user
 USER airflow
 
 # Set the PATH for the airflow user
@@ -22,6 +21,7 @@ ENV PATH="/home/airflow/.local/bin:${PATH}"
 # Install Python dependencies (MariaDB driver)
 RUN pip install --no-cache-dir mariadb
 
-# Copy and install your custom provider
-COPY --chown=airflow:airflow ./airflow-mariadb-provider /opt/airflow/.local/src/airflow-mariadb-provider
-RUN pip install --no-cache-dir -e /opt/airflow/.local/src/airflow-mariadb-provider
+# Install your custom provider
+# Make sure you install it without upgrading core Airflow packages
+COPY airflow-mariadb-provider /opt/airflow/airflow-mariadb-provider
+RUN pip install --no-deps /opt/airflow/airflow-mariadb-provider

@@ -19,10 +19,10 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.utils.task_group import TaskGroup
 from airflow.utils.dates import days_ago
-from airflow_mariadb_provider.operators.mariadb_operator import MariaDBOperator
-from airflow_mariadb_provider.operators.mariadb_cpimport_operator import MariaDBCpImportOperator
+from airflow.providers.mariadb.operators.mariadb import MariaDBOperator
+from airflow.providers.mariadb.operators.cpimport import MariaDBCpImportOperator
 from airflow.operators.dummy_operator import DummyOperator
-from airflow_mariadb_provider.hooks.mariadb_hook import MariaDBHook
+from airflow.providers.mariadb.hooks.mariadb import MariaDBHook
 from airflow.providers.sftp.operators.sftp import SFTPOperator
 
 import requests
@@ -57,7 +57,7 @@ def download_file(url: str, local_path: str):
 
 
 with DAG(
-        dag_id="OpenFlightsDataIngestion",
+        dag_id="Dag_OpenFlightsDataIngestion",
         description="Download OpenFlights data and load into MariaDB ColumnStore using cpimport with SSH",
         start_date=days_ago(1),
         schedule_interval=None,

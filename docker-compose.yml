@@ -3,9 +3,9 @@ version: '3.9'
 x-airflow-common:
   &airflow-common
   image: my-airflow:latest
-  build:
-    context: .
-    dockerfile: Dockerfile
+  # REMOVE THE BUILD BLOCK FROM HERE
+  # build:
+  #   dockerfile: Dockerfile
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
@@ -95,6 +95,10 @@ services:
 
   airflow-webserver:
     <<: *airflow-common
+    # ADD THE BUILD BLOCK TO ONE SERVICE ONLY
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: webserver
     ports:
       - "8080:8080"
