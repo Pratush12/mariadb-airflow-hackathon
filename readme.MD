@@ -91,9 +91,6 @@ Install the MariaDB provider directly from GitHub:
 ```bash
 # Install the latest version
 pip install -U git+https://github.com/Pratush12/mariadb-airflow-hackathon.git@main#subdirectory=airflow-mariadb-provider
-
-# Or install with all optional dependencies (S3, SSH support)
-pip install -U "git+https://github.com/Pratush12/mariadb-airflow-hackathon.git@main#subdirectory=airflow-mariadb-provider[all]"
 ```
 
 **Requirements:**
