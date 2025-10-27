@@ -14,11 +14,11 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.decorators import task
 from airflow.utils.dates import days_ago
-from airflow_mariadb_provider.operators.mariadb_operator import MariaDBOperator
-from airflow_mariadb_provider.operators.mariadb_cpimport_operator import MariaDBCpImportOperator
-from airflow_mariadb_provider.operators.mariadb_s3_load_operator import MariaDBS3LoadOperator
-from airflow_mariadb_provider.operators.mariadb_s3_dump_operator import MariaDBS3DumpOperator
-from airflow_mariadb_provider.hooks.mariadb_hook import MariaDBHook
+from airflow.providers.mariadb.operators.mariadb import MariaDBOperator
+from airflow.providers.mariadb.operators.cpimport import MariaDBCpImportOperator
+from airflow.providers.mariadb.operators.s3 import MariaDBS3LoadOperator
+from airflow.providers.mariadb.operators.s3 import MariaDBS3DumpOperator
+from airflow.providers.mariadb.hooks.mariadb import MariaDBHook
 
 default_args = {
     'owner': 'airflow',
@@ -39,7 +39,6 @@ dag = DAG(
     catchup=False,
     tags=['s3', 'mariadb', 'ssh'],
 )
-
 
 # Custom task to demonstrate hook usage
 

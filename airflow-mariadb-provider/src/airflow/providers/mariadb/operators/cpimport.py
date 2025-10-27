@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,14 +14,21 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+"""
+MariaDB cpimport operator for Apache Airflow.
+
+This module provides an operator for executing cpimport commands for MariaDB ColumnStore tables.
+"""
+
 from __future__ import annotations
 
-from typing import Optional, Dict, Any, Sequence
+from typing import Any, Sequence
+
+from airflow.exceptions import AirflowException
 from airflow.models import BaseOperator
 from airflow.utils.context import Context
-from airflow.exceptions import AirflowException
 
-from airflow_mariadb_provider.hooks.mariadb_hook import MariaDBHook
+from airflow.providers.mariadb.hooks.mariadb import MariaDBHook
 
 
 class MariaDBCpImportOperator(BaseOperator):
@@ -33,13 +39,13 @@ class MariaDBCpImportOperator(BaseOperator):
     before executing the cpimport command. It provides comprehensive
     error handling and logging for the import process.
 
-    :param table_name: Name of the target table
-    :param file_path: Path to the data file to import
-    :param schema: Database schema name (optional, uses connection schema if not provided)
-    :param mariadb_conn_id: Airflow connection ID for MariaDB
-    :param cpimport_options: Additional cpimport command options
-    :param validate_engine: Whether to validate ColumnStore engine before import (default: True)
-    :param ssh_conn_id: SSH connection ID for remote execution (required)
+    :param table_name: Name of the target table.
+    :param file_path: Path to the data file to import.
+    :param schema: Database schema name (optional, uses connection schema if not provided).
+    :param mariadb_conn_id: Airflow connection ID for MariaDB.
+    :param cpimport_options: Additional cpimport command options.
+    :param validate_engine: Whether to validate ColumnStore engine before import (default: True).
+    :param ssh_conn_id: SSH connection ID for remote execution (required).
     """
 
     template_fields: Sequence[str] = ("table_name", "file_path", "schema")
@@ -50,16 +56,16 @@ class MariaDBCpImportOperator(BaseOperator):
     ui_fgcolor = "#000000"
 
     def __init__(
-            self,
-            *,
-            table_name: str,
-            file_path: str,
-            schema: Optional[str] = None,
-            mariadb_conn_id: str = "maria_db_default",
-            cpimport_options: Optional[Dict[str, Any]] = None,
-            validate_engine: bool = True,
-            ssh_conn_id: str,
-            **kwargs,
+        self,
+        *,
+        table_name: str,
+        file_path: str,
+        schema: str | None = None,
+        mariadb_conn_id: str = "mariadb_default",
+        cpimport_options: dict[str, Any] | None = None,
+        validate_engine: bool = True,
+        ssh_conn_id: str,
+        **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.table_name = table_name
@@ -74,17 +80,12 @@ class MariaDBCpImportOperator(BaseOperator):
         """
         Execute the cpimport operation.
 
-        Args:
-            context: Airflow task context
-
-        Returns:
-            bool: True if import was successful
-
-        Raises:
-            AirflowException: If validation fails or cpimport command fails
+        :param context: Airflow task context.
+        :return: True if import was successful.
+        :raises AirflowException: If validation fails or cpimport command fails.
         """
-        self.log.info(f"Starting cpimport operation for table: {self.table_name}")
-        self.log.info(f"Source file: {self.file_path}")
+        self.log.info("Starting cpimport operation for table: %s", self.table_name)
+        self.log.info("Source file: %s", self.file_path)
 
         # Initialize MariaDB hook
         hook = MariaDBHook(mariadb_conn_id=self.mariadb_conn_id)
@@ -105,18 +106,18 @@ class MariaDBCpImportOperator(BaseOperator):
                 file_path=self.file_path,
                 schema=self.schema,
                 options=self.cpimport_options,
-                ssh_conn_id=self.ssh_conn_id
+                ssh_conn_id=self.ssh_conn_id,
             )
 
             if result:
-                self.log.info(f"✅ Successfully imported data into {self.table_name}")
+                self.log.info("✅ Successfully imported data into %s", self.table_name)
                 return True
             else:
                 raise AirflowException("cpimport command returned False")
 
         except Exception as e:
-            self.log.error(f"❌ cpimport operation failed: {e}")
-            raise AirflowException(f"cpimport operation failed: {e}")
+            self.log.error("❌ cpimport operation failed: %s", e)
+            raise AirflowException(f"cpimport operation failed: {e}") from e
 
     def on_kill(self) -> None:
         """Called when the task is killed."""

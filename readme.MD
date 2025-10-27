@@ -80,13 +80,56 @@ Automate **OpenFlights** data ingestion using:
 
 ## ⚙️ Installation & Setup Instructions
 
-Follow these steps to set up and run the **Airflow MariaDB Connector project** locally.
+Choose the installation method that best fits your needs:
 
 ---
 
-### 🧱 Step 1: Add Custom Provider to Airflow
+### 🚀 Option 1: Quick Install (Recommended for Production)
 
-Since Airflow doesn’t natively support MariaDB, we created a **custom provider**.
+Install the MariaDB provider directly from GitHub:
+
+```bash
+# Install the latest version
+pip install -U git+https://github.com/Pratush12/mariadb-airflow-hackathon.git@main#subdirectory=airflow-mariadb-provider
+
+# Or install with all optional dependencies (S3, SSH support)
+pip install -U "git+https://github.com/Pratush12/mariadb-airflow-hackathon.git@main#subdirectory=airflow-mariadb-provider[all]"
+```
+
+**Requirements:**
+- Python 3.8+
+- Apache Airflow 2.5.0+
+- MariaDB server (for database operations)
+- SSH access (for cpimport operations)
+
+---
+
+### 🔧 Option 2: Clone and Install (Development)
+
+For development or customization:
+
+```bash
+# Clone the repository
+git clone https://github.com/Pratush12/mariadb-airflow-hackathon.git
+cd mariadb-airflow-hackathon/airflow-mariadb-provider
+
+# Install in development mode
+pip install -e ".[all]"
+
+# Or install with specific features
+pip install -e ".[amazon]"  # S3 support
+pip install -e ".[ssh]"     # SSH support
+```
+
+---
+
+### 🐳 Option 3: Docker Setup (Full Development Environment)
+
+For a complete development environment with MariaDB ColumnStore:
+
+#### 🧱 Step 1: Add Custom Provider to Airflow
+
+Since Airflow doesn't natively support MariaDB, we created a **custom provider**.
 
 This provider:
 - Adds **MariaDB connection type**
@@ -95,11 +138,40 @@ This provider:
 
 ```bash
 # Clone or copy your provider into the airflow directory
-COPY ./airflow-mariadb-provider /opt/airflow/.local/src/airflow-mariadb-provider
+COPY airflow-mariadb-provider /opt/airflow/airflow-mariadb-provider
 
 # Install the provider
-pip install -e /opt/airflow/.local/src/airflow-mariadb-provider
+RUN pip install --no-deps /opt/airflow/airflow-mariadb-provider
 ```
+---
+
+## 🏃‍♂️ Quick Start
+
+After installation, create a MariaDB connection in Airflow:
+
+1. **Go to Admin → Connections** in Airflow UI (`localhost:8080`)
+2. **Add new connection:**
+   - **Connection ID**: `maria_db_default`
+   - **Connection Type**: `MariaDB`
+   - **Host**: Your MariaDB server
+   - **Port**: 3306
+   - **Login**: Your username
+   - **Password**: Your password
+   - **Schema**: Your database name
+
+3. **Use the operators in your DAGs:**
+```python
+from airflow.providers.mariadb.operators.mariadb import MariaDBOperator
+
+# Basic SQL execution
+sql_task = MariaDBOperator(
+    task_id="execute_sql",
+    mariadb_conn_id="maria_db_default",
+    sql="SELECT * FROM my_table"
+)
+```
+
+---
 
 ### 🐬 Step 2: Install MariaDB with ColumnStore Engine
 
@@ -129,25 +201,30 @@ Your docker-compose.yml connects both containers (Airflow + MariaDB) via the sam
 # Use the official Airflow image
 FROM apache/airflow:2.9.0
 
+# Switch to root user to install system dependencies
 USER root
 
-# Install dependencies for MariaDB
+# Install system dependencies for MariaDB
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         gcc \
         libmariadb-dev \
         mariadb-client && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 USER airflow
+
+# Set the PATH for the airflow user
 ENV PATH="/home/airflow/.local/bin:${PATH}"
 
-# Install Python MariaDB driver
+# Install Python dependencies (MariaDB driver)
 RUN pip install --no-cache-dir mariadb
 
-# Copy and install custom provider
-COPY --chown=airflow:airflow ./airflow-mariadb-provider /opt/airflow/.local/src/airflow-mariadb-provider
-RUN pip install --no-cache-dir -e /opt/airflow/.local/src/airflow-mariadb-provider
+# Install your custom provider
+# Make sure you install it without upgrading core Airflow packages
+COPY airflow-mariadb-provider /opt/airflow/airflow-mariadb-provider
+RUN pip install --no-deps /opt/airflow/airflow-mariadb-provider
 ```
 
 ### 🔐 Step 5: Enable SSH Connection in MariaDB Container
@@ -171,11 +248,11 @@ docker restart airflow-docker-airflow-webserver-1
 
 Once Airflow is running, configure these connections in the Airflow UI (`localhost:8080 → Admin → Connections`):
 
-| Connection ID              | Type    | Description                                                             |
-| -------------------------- | ------- | ----------------------------------------------------------------------- |
-| `mariadb_default`          | MariaDB | Host: `maria_db_hostname`, Port: `3306`, User: `username`, Password: `mariadb_root_pass` |
-| `mariadb_ssh_connection`   | SSH     | Host: `mariadb_server_host`, Port: `22`, Username: `username`, Password: `mariadb_root_pass`   |
-| `aws_default` *(optional)* | S3      | For S3 data transfer workflows                                          |
+| Connection ID              | Type    | Description                                                                   |
+|----------------------------| ------- |-------------------------------------------------------------------------------|
+| `maria_db_default`         | MariaDB | Host: `hostname`, Port: `3306`, User: `user`, Password: `password`            |
+| `mariadb_ssh_connection`   | SSH     | Host: `hostname`, Port: `22`, Username: `user`, Password: `password` |
+| `aws_default` *(optional)* | S3      | For S3 data transfer workflows                                                |
 
 ---
 
@@ -184,27 +261,62 @@ Once Airflow is running, configure these connections in the Airflow UI (`localho
 Below is the overall structure of the project:
 
 ```
-project-root/
+mariadb-airflow-hackathon/
 │
-├─ README.md # Project documentation
+├─ readme.MD # Project documentation
 ├─ docker-compose.yml # Docker Compose setup for Airflow + MariaDB
 ├─ Dockerfile # Custom Airflow image with MariaDB connector
+├─ requirements.txt # Python dependencies
+├─ mysql_vs_mariadb.py # Performance benchmarking script
 ├─ images/ # Screenshots, performance charts
-│ └─ performance_comparison.png
+│ └─ comparison_between_mariadb_mysql.png
 ├─ dags/ # Airflow DAGs
-│ └─ openflights_dag.py
-|  └─ mariadb_s3_operators_dag.py
-├─ airflow-mariadb-provider/ # Custom Airflow provider
-│ ├─ airflow_mariadb_provider/ # Main provider module
-│ │ ├─ init.py
-│ │ ├─ hooks/ # Hooks for MariaDB, S3, cpimport
-│ │ │ └─ mariadb_hook.py
-│ │ ├─ operators/ # Custom Airflow operators
-│ │  ├─ mariadb_cpimport_operator.py # Bulk loading via cpimport
-│ │  ├─ mariadb_operator.py # Generic MariaDB task execution
-│ │  ├─ mariadb_s3_dump_operator.py # Uploads MariaDB data to S3
-│ │  └─ mariadb_s3_load_operator.py # Loads data from S3 into MariaDB
-│ └─ setup.py # Installation and package setup
+│ ├─ config/
+│ │ └─ datasets.json # Dataset configuration
+│ ├─ openflights_dag.py # Main OpenFlights data ingestion DAG
+│ ├─ mariadb_s3_operators_dag.py # S3 integration DAG
+└─ airflow-mariadb-provider/ # Apache Airflow MariaDB Provider
+   ├─ pyproject.toml # Modern Python packaging configuration
+   ├─ README.rst # Provider documentation
+   ├─ docs/ # Sphinx documentation
+   │ ├─ index.rst
+   │ ├─ changelog.rst
+   │ ├─ commits.rst
+   │ ├─ operators.rst
+   │ ├─ security.rst
+   │ ├─ connections/
+   │ │ └─ mariadb.rst
+   │ ├─ example_dags/
+   │ │ ├─ example_mariadb_basic.py
+   │ │ ├─ example_mariadb_cpimport.py
+   │ │ └─ example_mariadb_s3.py
+   │ └─ installing-providers-from-sources.rst
+   │
+   ├─ src/airflow/providers/mariadb/ # Main provider code
+   │ ├─ __init__.py # Provider metadata
+   │ ├─ get_provider_info.py # Provider information
+   │ ├─ hooks/
+   │ │ ├─ __init__.py
+   │ │ └─ mariadb.py # MariaDB hook implementation
+   │ ├─ operators/
+   │ │ ├─ __init__.py
+   │ │ ├─ mariadb.py # Basic MariaDB operator
+   │ │ ├─ cpimport.py # cpimport operator
+   │ │ └─ s3.py # S3 integration operators
+   │ ├─ sensors/
+   │ │ └─ __init__.py
+   │ └─ transfers/
+   │     └─ __init__.py
+   │
+   └─ tests/ # Comprehensive test suite
+      ├─ conftest.py # Test configuration
+      ├─ unit/mariadb/ # Unit tests
+      │ ├─ hooks/
+      │ │ └─ test_mariadb.py
+      │ └─ __init__.py
+      └─ system/mariadb/ # System tests
+         ├─ example_mariadb.py
+         └─ __init__.py
 ```
 
 ---
